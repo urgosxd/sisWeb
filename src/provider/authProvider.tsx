@@ -1,45 +1,108 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { AuthProviderType } from "../@types/authTypes";
+import { Navigate, Outlet } from "react-router-dom";
+
+const BASEURL = 'https://siswebbackend.pdsviajes.com/'
 
 const AuthContext = createContext<AuthProviderType | null>(null);
 
-const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
-  // State to hold the authentication token
-  const [token, setToken_] = useState(localStorage.getItem("token"));
+export const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
+    let [authTokens, setAuthTokens] = useState(localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')!!) : null)
+    let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')!!).user.username : null)
+    let [loading, setLoading] = useState(true)
 
-  // Function to set the authentication token
-  const setToken = (newToken:string) => {
-    setToken_(newToken);
-  };
+    // const history = useHistory()
 
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-      localStorage.setItem('token',token);
-    } else {
-      delete axios.defaults.headers.common["Authorization"];
-      localStorage.removeItem('token')
+    let loginUser = async (e:any )=> {
+        e.preventDefault()
+        let response = await fetch(BASEURL + 'api/login/', {
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({'username':e.target.username.value, 'password':e.target.password.value})
+        })
+        let data = await response.json()
+
+        if(response.status === 200){
+            setAuthTokens(data)
+            setUser(data.user.username)
+            localStorage.setItem('authTokens', JSON.stringify(data))
+        }else{
+            alert('Something went wrong!')
+        }
     }
-  }, [token]);
 
-  // Memoized value of the authentication context
-  const contextValue = useMemo(
-    () => ({
-      token,
-      setToken,
-    }),
-    [token]
-  );
 
-  // Provide the authentication context to the children components
-  return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-  );
+    let logoutUser = () => {
+        setAuthTokens(null)
+        setUser(null)
+        localStorage.removeItem('authTokens')
+        // history.push('/login')
+    }
+
+
+    let updateToken = async ()=> {
+
+        let response = await fetch(BASEURL+'api/tokken/refresh/', {
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({'refresh':authTokens?.refresh})
+        })
+
+        let data = await response.json()
+        
+        if (response.status === 200){
+            setAuthTokens(data)
+            setUser(data.user.username)
+            localStorage.setItem('authTokens', JSON.stringify(data))
+        }else{
+            logoutUser()
+        }
+
+        if(loading){
+            setLoading(false)
+        }
+    }
+
+    let contextData = {
+        user:user,
+        authTokens:authTokens,
+        loginUser:loginUser,
+        logoutUser:logoutUser,
+    }
+
+
+    useEffect(()=> {
+
+        if(loading){
+            updateToken()
+        }
+
+        let fourMinutes = 1000 * 60 * 4
+
+        let interval =  setInterval(()=> {
+            if(authTokens){
+                updateToken()
+            }
+        }, fourMinutes)
+        return ()=> clearInterval(interval)
+
+    }, [authTokens, loading])
+
+    return(
+        <AuthContext.Provider value={contextData} >
+            {loading ? null : children}
+        </AuthContext.Provider>
+    )
 };
 
 export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-export default AuthProvider;
+
+

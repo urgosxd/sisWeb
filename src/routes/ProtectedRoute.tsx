@@ -4,10 +4,10 @@ import { AuthProviderType } from "../@types/authTypes";
 
 
 export const ProtectedRoute = () => {
-  const { token } = useAuth() as AuthProviderType;
+  const { user } = useAuth() as AuthProviderType;
 
   // Check if the user is authenticated
-  if (!token) {
+  if (!user) {
     // If not authenticated, redirect to the login page
     return <Navigate to="/login" />;
   }

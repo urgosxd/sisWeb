@@ -1,4 +1,8 @@
 export type AuthProviderType = {
-    token: string | null;
-    setToken: (newToken: string) => void;
+
+    user: string | null;
+    authTokens: any;
+    loginUser:(e:any)=>Promise<void>
+    logoutUser:()=>void
+
 }
