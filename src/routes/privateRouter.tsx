@@ -1,11 +1,18 @@
-import { Route, redirect } from 'react-router-dom'
+import { Route, Navigate } from 'react-router-dom'
 import { useContext } from 'react'
+import { useAuth } from '../provider/authProvider'
+import { AuthProviderType } from '../@types/authTypes'
 
-const PrivateRoute = ({children, ...rest}) => {
-    let {user} = useAuth as AuthProviderType
-    return(
-        <Route {...rest}>{!user ? <Redirect to="/login" /> :   children}</Route>
-    )
-}
+export type ProtectedRouteProps = {
+  isAuthenticated: boolean;
+  authenticationPath: string;
+  outlet: JSX.Element;
+};
 
-export default PrivateRoute;
+export default function ProtectedRoute({isAuthenticated, authenticationPath, outlet}: ProtectedRouteProps) {
+  if(isAuthenticated) {
+    return outlet;
+  } else {
+    return <Navigate to={{ pathname: authenticationPath }} />;
+  }
+};

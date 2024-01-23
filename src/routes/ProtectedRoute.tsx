@@ -1,17 +1,28 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../provider/authProvider";
-import { AuthProviderType } from "../@types/authTypes";
+import { useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router';
+
+export type ProtectedRouteProps = {
+  isAuthenticated: boolean;
+  authenticationPath: string;
+  redirectPath: string;
+  setRedirectPath: (path: string) => void;
+  outlet: JSX.Element;
+};
 
 
-export const ProtectedRoute = () => {
-  const { user } = useAuth() as AuthProviderType;
+export default function ProtectedRoute({isAuthenticated, authenticationPath, redirectPath, setRedirectPath, outlet}: ProtectedRouteProps) {
+  
+  const currentLocation = useLocation();
 
-  // Check if the user is authenticated
-  if (!user) {
-    // If not authenticated, redirect to the login page
-    return <Navigate to="/login" />;
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setRedirectPath(currentLocation.pathname);
+    }
+  }, [isAuthenticated, setRedirectPath, currentLocation]);
+
+  if(isAuthenticated && redirectPath === currentLocation.pathname) {
+    return outlet;
+  } else {
+    return <Navigate to={{ pathname: isAuthenticated ? redirectPath : authenticationPath }} />;
   }
-
-  // If authenticated, render the child routes
-  return <Outlet />;
 };

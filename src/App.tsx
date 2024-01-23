@@ -1,18 +1,20 @@
 import React from "react";
 import useSWR from "swr";
 import {AuthProvider} from "./provider/authProvider";
-import Routes from "./routes";
 const fetcher = (url:string) => fetch(url).then((res) => res.json());
-import { BrowserRouter as Router, Route } from 'react-router-dom'
+import PrivateRoute, { ProtectedRouteProps } from "./routes/privateRouter";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/loginPage";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import { BrowserRouter } from "react-router-dom";
+import { AuthWrapper } from "./auth/AuthWrapper";
 
 export default function App() {
-return (
-    
-    <Router>
-    <AuthProvider>
-        <div></div>
-    </AuthProvider>
-
-    </Router>
-      );
+  return (
+    <div className="App">
+      <BrowserRouter>
+        <AuthWrapper/>
+      </BrowserRouter>      
+    </div>
+  );
 }

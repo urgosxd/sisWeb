@@ -1,8 +1,10 @@
 export type AuthProviderType = {
 
-    user: string | null;
-    authTokens: any;
-    loginUser:(e:any)=>Promise<void>
-    logoutUser:()=>void
+    user: {
+    name:string
+    isAuthenticated:boolean
+  };
+    login:(e)=>Promise<void>
+    logout:()=>void
 
 }
