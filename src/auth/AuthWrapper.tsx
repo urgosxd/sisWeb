@@ -20,7 +20,7 @@ export const AuthWrapper = () => {
 
     let loginUser = async (e:any )=> {
         e.preventDefault()
-        let response = await fetch(BASEURL + 'api/login/', {
+        let response = await fetch(BASEURL + 'apiAuth/login/', {
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -50,7 +50,7 @@ export const AuthWrapper = () => {
 
     let updateToken = async ()=> {
 
-        let response = await fetch(BASEURL+'api/tokken/refresh/', {
+        let response = await fetch(BASEURL+'apiAuth/tokken/refresh/', {
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
