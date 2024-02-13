@@ -1,23 +1,26 @@
-import axios from "axios";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react"
+import { RenderMenu, RenderRoutes } from "../components/structure/RenderNavigation";
 import { AuthProviderType } from "../@types/authTypes";
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const BASEURL = 'https://siswebbackend.pdsviajes.com/'
+const BASEURL = 'http://127.0.0.1:8000/'
 
-const AuthContext = createContext<AuthProviderType | null>(null);
+const AuthContext = createContext<null | AuthProviderType>(null) ;
+export const AuthData = () => useContext(AuthContext);
 
-export const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
-    let [authTokens, setAuthTokens] = useState(localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')!!) : null)
-    let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')!!).user.username : null)
+
+export const AuthWrapper = () => {
+  
+ let [authTokens, setAuthTokens] = useState(localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')!!) : null)
+    let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? {name:JSON.parse(localStorage.getItem('authTokens')!!).user.username,isAuthenticated:true} : {name:"",isAuthenticated:false})
     let [loading, setLoading] = useState(true)
 
     // const history = useHistory()
-      const router = useNavigate()
+      // const router = useNavigate()
 
     let loginUser = async (e:any )=> {
         e.preventDefault()
-        let response = await fetch(BASEURL + 'api/login/', {
+        let response = await fetch(BASEURL + 'apiAuth/login/', {
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -28,9 +31,8 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) 
 
         if(response.status === 200){
             setAuthTokens(data)
-            setUser(data.user.username)
+            setUser({name:data.user.username,isAuthenticated:true})
             localStorage.setItem('authTokens', JSON.stringify(data))
-            router("/")
         }else{
             alert('Something went wrong!')
         }
@@ -39,16 +41,16 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) 
 
     let logoutUser = () => {
         setAuthTokens(null)
-        setUser(null)
+        setUser({...user!!,isAuthenticated:false})
         localStorage.removeItem('authTokens')
-        router("/login")
+        // router("/login")
         // history.push('/login')
     }
 
 
     let updateToken = async ()=> {
 
-        let response = await fetch(BASEURL+'api/tokken/refresh/', {
+        let response = await fetch(BASEURL+'apiAuth/tokken/refresh/', {
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -72,10 +74,10 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) 
     }
 
     let contextData = {
-        user:user,
+        user:user!,
         authTokens:authTokens,
-        loginUser:loginUser,
-        logoutUser:logoutUser,
+        login:loginUser,
+        logout:logoutUser,
     }
 
 
@@ -96,16 +98,16 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({ children }) 
 
     }, [authTokens, loading])
 
-    return(
-        <AuthContext.Provider value={contextData} >
-            {loading ? null : children}
-        </AuthContext.Provider>
-    )
-};
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+     return (
+          
+               <AuthContext.Provider value={contextData}>
+                    <>
+                         <RenderMenu />
+                         <RenderRoutes />
+                    </>
+               </AuthContext.Provider>
+          
+     )
 
-
-
+}

@@ -17,6 +17,8 @@
     "react-dom": "^18.2.0",
     "react-drag-drop-files": "^2.3.10",
     "react-router-dom": "^6.21.3",
+    "react-spinners": "^0.13.8",
+    "react-toastify": "^10.0.4",
     "swr": "^2.2.4"
   },
   "devDependencies": {

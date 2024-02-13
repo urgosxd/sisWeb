@@ -1,12 +1,12 @@
 import { Link, Route, Routes } from "react-router-dom";
-import { AuthData } from "../../auth/AuthWrapper";
+import { AuthWrapper,AuthData } from "../../provider/authProvider"
 import { nav } from "./navigation";
 import { AuthProviderType } from "../../@types/authTypes";
 
 
 export const RenderRoutes = () => {
 
-        const { user } = AuthData();
+        const { user } = AuthData() as AuthProviderType;
         
         return (
              <Routes>
@@ -35,7 +35,6 @@ export const RenderRoutes = () => {
         return (
              <div className="menu">
                   { nav.map((r, i) => {
-   
                        if (!r.isPrivate && r.isMenu) {
                             return (
                                  <MenuItem key={i} r={r}/>

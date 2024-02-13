@@ -1,13 +1,14 @@
 import useSWR from "swr";
-import { DocumentIcon } from '@heroicons/react/24/outline'
+import { DocumentIcon,TrashIcon } from '@heroicons/react/24/outline'
 import {
   Button, Card, Input, Textarea, Typography, Popover,
   PopoverHandler,
   PopoverContent,
 } from "@material-tailwind/react";
-import { useState } from "react";
-import { createTour } from "../lib/api";
+import { useEffect, useRef, useState } from "react";
+import { createTour, deleteTour, getFicha, updateTour } from "../lib/api";
 import { FileUploader } from "react-drag-drop-files";
+import Loader from "./spinner";
 
 interface Props {
   isCreating: boolean
@@ -24,71 +25,215 @@ interface Props {
 }
 
 
-function RowTable({ TABLE_HEAD, TABLE_ROWS, isCreating }: Props) {
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+function RowTable() {
+
+
+  const { data, error, isLoading } = useSWR(
+    // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
+    "http://127.0.0.1:8000/apiCrud/tours/tour/",
+    fetcher,{ refreshInterval: 10 }
+    // fetcher
+  );
+
+
+
+  
+
+
+  const TABLE_HEAD = ["Ciudad", "Excursion", "Proveedor", "ppp", "pvp","pdf","","edit","","eliminar"];
+  
+  const TABLE_ROWS: {
+    id:number
+    ciudad: string
+    excursion: string
+    provedor: string
+    ppp: string
+    pvp: string
+    fichasTecnicas: number[]
+  }[] = data ? data: []
+
+
 
 
   const [edits, setEdites] = useState(Array.from(TABLE_ROWS, (_) => false))
+  const [uploadTime,setUploadTime] = useState(Array.from(TABLE_ROWS, (_) => false))
+  const [createUpload,setCreateUpload] = useState(false)
 
+  
   const fileTypes = ["PDF"];
 
   const editChangeById = (id: number) => {
     setEdites(el => el.map((ele, idx) => idx == id ? !ele : false))
   }
-  const [file, setFile] = useState<File 
-    |null>(null);
-  const handleChange = (file:File) => {
-    setFile(file);
+
+  const [file, setFile] = useState<Array<File | undefined>
+  >([]);
+
+  const [isCreating,setIsCreating] = useState(false)
+  // const [isDeleting,setIsDeleting] = useState(false)
+
+
+
+  const handleDelete = async (id:number,idxx:number)=>{
+    setUploadTime(el => el.map((ele, idx) => idx == idxx ?true : false))
+    await deleteForm(id)
+  }
+  const handleChangeCreate = (index: number, newFile: File) => {
+    const insertAt = index
+    const nextFile = file.length - 1 <= index ? file.concat(Array.from(Array(index - (file.length - 1)), () => undefined).map((el, idx) => {
+      if (idx == index - (file.length - 1) - 1) {
+        return newFile
+      }
+      else {
+        return el
+      }
+    })) : [
+      ...file.slice(0, insertAt),
+      newFile,
+      ...file.slice(insertAt)
+    ]
+    setFile(nextFile);
   };
 
-  function getDataFromFileName(path:string){
+  const handleChangeUpdate = (index: number, newFile: File) => {
+    const empty: Array<File | undefined> = []
+    empty[index] = newFile
+    setFile(el => el.length > index ? el!.map((ele, idx) => {
+      if (idx == index) {
+        return newFile
+      } else {
+        return ele
+      }
+    }) : empty);
+  };
+  const myForm = useRef<HTMLFormElement | null>(null)
+
+  function getDataFromFileName(path: string) {
     console.log(path);
-    
     const pathSplit = path.split(".")
     console.log(pathSplit)
     const extension = pathSplit.slice(-1)[0]
     console.log(extension)
-    const filename = pathSplit.slice(0,-1).join()
-    
-    return [filename,extension]
+    const filename = pathSplit.slice(0, -1).join()
+    return [filename, extension]
   }
-async function getBase64(file:File) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      resolve(reader.result)
-    }
-    reader.onerror = reject
-  })
-}
+  async function getBase64(file: File) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        resolve(reader.result)
+      }
+      reader.onerror = reject
+    })
+  }
+
   const createForm = async (e) => {
     e.preventDefault()
+    setCreateUpload(prev=>true)
     console.log(file)
-    const preBlob = await file!.arrayBuffer()
+    if (file.includes(undefined)){
+      return 
+    }
     
-    const blob = new Blob([new Uint8Array(preBlob)],{type: file!.type})
+    // const preBlobs = await Promise.all(file!.map(ele=> ele.arrayBuffer()))
 
-    const result = await getBase64(file!)
-      
-    const  [Filename,Extension] =  getDataFromFileName(file!.name)
+    // const blobs = preBlobs?.map((ele,idx)=> new Blob( [new Uint8Array(ele)],{type: file![idx].type }))
+
+    // const blob = new Blob([new Uint8Array(preBlob)],{type: file!.type})
+
+    const result = await Promise.all(file!.map(async ele => getBase64(ele!)))
+
+    // const  [Filename,Extension] =  getDataFromFileName(file!.name)
+    const res = []
+    for (let idx = 0; idx < result.length; idx++) {
+      const [FileName, Extension] = getDataFromFileName(file![idx]!.name)
+      res.push({ FileName: FileName, Extension: Extension, Doc_Content: result[idx] })
+    }
 
     let formData = new FormData();
-      formData.append("ciudad",e.target.ciudad.value)
-      formData.append("excursion",e.target.excursion.value)
-      formData.append("provedor",e.target.provedor.value)
-      formData.append("ppp",e.target.ppp.value)
-      formData.append("pvp",e.target.pvp.value)
-      // formData.append("blobs",blob)
-      formData.append("fichas",JSON.stringify([{FileName:Filename,Extension:Extension,Doc_Content:result}]))
-
-    console.log(Extension)
+    formData.append("ciudad", e.target.ciudad.value)
+    formData.append("excursion", e.target.excursion.value)
+    formData.append("provedor", e.target.provedor.value)
+    formData.append("ppp", e.target.ppp.value)
+    formData.append("pvp", e.target.pvp.value)
+    formData.append("fichas", JSON.stringify(res))
     await createTour(formData)
+    // setIsCreating(prev=>false)
 
+  }
+
+  useEffect(()=>{
+    setFile(prev=>[])
+    setIsCreating(prev=>false)
+    setCreateUpload(prev=>false)
+    setUploadTime(prev=>Array.from(TABLE_ROWS, (_) => false))
+    setEdites(prev=>Array.from(TABLE_ROWS, (_) => false))
+  },[data])
+
+  console.log(file)
+
+  const updateForm = async (id: number, e,index:number) => {
+
+    e.preventDefault()
+    
+    setUploadTime(el => el.map((ele, idx) => idx == index ? true : false))
+    let formData = new FormData(myForm.current!)
+    const newFormObject: { [key: string]: string } = {}
+
+    formData.forEach((value, key) => {
+      newFormObject[key] = value.toString()
+    })
+
+    if (file!.length > 0) {
+      const result = await Promise.all(file!.map(async ele => getBase64(ele!)))
+      const res = []
+      for (let idx = 0; idx < result.length; idx++) {
+        const myFile = file?.[idx]
+        if (myFile) {
+          const [FileName, Extension] = getDataFromFileName(myFile.name)
+          res.push({ FileName: FileName, Extension: Extension, Doc_Content: result[idx] })
+        } else {
+          res.push(undefined)
+        }
+      }
+      newFormObject["fichas"] = JSON.stringify(res)
+    
+    }
+
+    await updateTour(id, newFormObject)
+  }
+
+  const deleteForm = async (id:number)=>{
+    await deleteTour(id)
+  }
+
+  async function getFichaTecnica(id:number){
+     const data =  await getFicha(id)
+     getFileDownload(data)
+  }
+
+  function getFileDownload(data:any){
+
+    const href = URL.createObjectURL(data);
+
+    // create "a" HTML element with href to file & click
+    const link = document.createElement('a');
+    link.href = href;
+    link.setAttribute('download', 'file.pdf'); //or any other extension
+    document.body.appendChild(link);
+    link.click();
+
+    // clean up "a" element & remove ObjectURL
+    document.body.removeChild(link);
+    URL.revokeObjectURL(href);
   }
 
   return (
     <div>
-      {/* {JSON.stringify(data)} */}
       <Card className="h-full w-full overflow-scroll">
         <table className="w-full min-w-max table-auto text-left">
           <thead>
@@ -106,13 +251,14 @@ async function getBase64(file:File) {
                     {head}
                   </Typography>
                 </th>
-              ))}
+              ))
+            }
             </tr>
           </thead>
           <tbody>
             {<form id="CreateForm" onSubmit={createForm}></form>}
-            {isCreating && <tr>
-
+            {isCreating &&
+              <tr>
               <td className={"p-4 border-b border-blue-gray-50"}>
                 <Input
                   type="text"
@@ -129,6 +275,7 @@ async function getBase64(file:File) {
                 />
               </td>
               <td className={"p-4 border-b border-blue-gray-50"}>
+                
                 <Input
                   type="text"
                   // value={ciudad}
@@ -186,23 +333,36 @@ async function getBase64(file:File) {
                     className: "hidden",
                   }}
                   form="CreateForm"
-                  name="pvp"
                   containerProps={{ className: "min-w-[100px]" }}
                 />
               </td>
-                <td className={"p-4 border-b border-blue-gray-50"}>
-                    <Popover>
-                      <PopoverHandler>
-                        <DocumentIcon className="w-5" />
-                      </PopoverHandler>
-                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0" >
-                        <FileUploader handleChange={handleChange} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" />
-                      </PopoverContent>
-                    </Popover>
-                  </td>
+              <td className={"p-4 border-b border-blue-gray-50"}>
+                <Popover>
+                  <PopoverHandler>
+                    <DocumentIcon className="w-5" />
+                  </PopoverHandler>
+                  <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0" >
+                    <FileUploader handleChange={(ele: File) => handleChangeCreate(0, ele)} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" />
+                    {file[0] && file[0].name}
+                  </PopoverContent>
+                </Popover>
+              </td>
+              <td className={"p-4 border-b border-blue-gray-50"}>
+                <Popover>
+                  <PopoverHandler>
+                    <DocumentIcon className="w-5" />
+                  </PopoverHandler>
+                  <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0" >
+                    <FileUploader handleChange={(ele: File) => handleChangeCreate(1, ele)} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" />
+                    {file[1] && file[1].name}
+                  </PopoverContent>
+                </Popover>
+              </td>
+
 
 
               <td className={"p-4 border-b border-blue-gray-50"}>
+                  {createUpload ?<Loader/> :
                 <Input
                   // type="text"
                   type="submit"
@@ -210,22 +370,23 @@ async function getBase64(file:File) {
                   value="Create"
                   // onClick={(e) => console.log(e)}
                   className="font-medium"
-                />
+                />}
               </td>
-
-
             </tr>}
-            {TABLE_ROWS.map(({ id, ciudad, excursion, provedor, ppp, pvp, fichasTecnicas }, index) => {
+            {isLoading ? "loaddd" :  TABLE_ROWS.map(({ id, ciudad, excursion, provedor, ppp, pvp, fichasTecnicas }, index) => {
               const isLast = index === TABLE_ROWS.length - 1;
               const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
-
               return edits[index] ?
-                <tr key={ciudad}>
+
+                <tr key={id}>
+                  {<form ref={myForm} id="subForm" onSubmit={el => updateForm(id, el,index)}></form>}
                   <td className={classes}>
                     <Input
                       type="text"
                       // value={ciudad}
                       defaultValue={ciudad}
+                      name="ciudad"
+                      form="subForm"
                       placeholder="ciudad"
                       className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                       labelProps={{
@@ -239,6 +400,8 @@ async function getBase64(file:File) {
                       type="text"
                       // value={ciudad}
                       defaultValue={excursion}
+                      name="excursion"
+                      form="subForm"
                       placeholder="excursion"
                       className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                       labelProps={{
@@ -265,6 +428,8 @@ async function getBase64(file:File) {
                       type="text"
                       // value={ciudad}
                       defaultValue={ppp}
+                      name="ppp"
+                      form="subForm"
                       placeholder="ppp"
                       className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                       labelProps={{
@@ -279,6 +444,8 @@ async function getBase64(file:File) {
                       type="text"
                       // value={ciudad}
                       defaultValue={pvp}
+                      name="pvp"
+                      form="subForm"
                       placeholder="pvp"
                       className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                       labelProps={{
@@ -294,26 +461,41 @@ async function getBase64(file:File) {
                       </PopoverHandler>
                       <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
 
-                        <FileUploader handleChange={handleChange} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" />
-                        
-                        </PopoverContent>
+                        <FileUploader handleChange={(e: File) => handleChangeCreate(0, e)} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" />
+                        {file[0] && file[0].name}
+                      </PopoverContent>
                     </Popover>
                   </td>
                   <td className={classes}>
-                    <Typography
-                      as="a"
-                      href="#"
-                      variant="small"
-                      color="blue-gray"
-                      onClick={() => editChangeById(index)}
-                      className="font-medium"
-                    >
-                    Editar
-                    </Typography>
+                    <Popover>
+                      <PopoverHandler>
+                        <DocumentIcon className="w-5" />
+                      </PopoverHandler>
+                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
+
+                        <FileUploader handleChange={(e: File) => handleChangeCreate(1, e)} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" />
+
+                        {file[1] && file[1].name}
+                      </PopoverContent>
+                    </Popover>
                   </td>
+
+                  <td className="">
+                    { uploadTime[index] ? <Loader/> :
+                    <Input
+                      type="submit"
+                      color="blue-gray"
+                      form="subForm"
+                      className="font-medium"
+                      value="Editar"
+                    />
+
+                  }
+                  </td>
+                    
                 </tr>
                 : <tr key={ciudad}>
-                  <td className={classes}>
+                  <td className={classes} onClick={() => editChangeById(index)}>
                     <Typography
                       variant="small"
                       color="blue-gray"
@@ -322,7 +504,7 @@ async function getBase64(file:File) {
                       {ciudad}
                     </Typography>
                   </td>
-                  <td className={classes}>
+                  <td className={classes} onClick={() => editChangeById(index)}>
                     <Typography
                       variant="small"
                       color="blue-gray"
@@ -332,7 +514,7 @@ async function getBase64(file:File) {
                     </Typography>
                   </td>
 
-                  <td className={classes}>
+                  <td className={classes} onClick={() => editChangeById(index)}>
                     <Typography
                       variant="small"
                       color="blue-gray"
@@ -341,7 +523,7 @@ async function getBase64(file:File) {
                       {provedor}
                     </Typography>
                   </td>
-                  <td className={classes}>
+                  <td className={classes} onClick={() => editChangeById(index)}>
                     <Typography
                       variant="small"
                       color="blue-gray"
@@ -350,7 +532,7 @@ async function getBase64(file:File) {
                       {ppp}
                     </Typography>
                   </td>
-                  <td className={classes}>
+                  <td className={classes} onClick={() => editChangeById(index)}>
                     <Typography
                       variant="small"
                       color="blue-gray"
@@ -359,15 +541,12 @@ async function getBase64(file:File) {
                       {pvp}
                     </Typography>
                   </td>
-                  <td className={classes}>
-                    <Popover>
-                      <PopoverHandler>
+                  <td className={classes} onClick={async () =>await getFichaTecnica(fichasTecnicas[0])}>
                         <DocumentIcon className="w-5" />
-                      </PopoverHandler>
-                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0" >
+                  </td>
 
-                      </PopoverContent>
-                    </Popover>
+                  <td className={classes} onClick={async () => await  getFichaTecnica(fichasTecnicas[1])}>
+                        <DocumentIcon className="w-5" />
                   </td>
 
 
@@ -380,14 +559,31 @@ async function getBase64(file:File) {
                       onClick={() => editChangeById(index)}
                       className="font-medium "
                     >
-                      {}
+                      
                     </Typography>
+                  </td>
+                   <td className={classes}>
+                    <Typography
+                      as="a"
+                      href="#"
+                      variant="small"
+                      color="blue-gray"
+                      onClick={() => editChangeById(index)}
+                      className="font-medium "
+                    >
+                    </Typography>
+                  </td>
+                    <td className={classes}>
+                     {uploadTime[index] ? <Loader/> : <TrashIcon className="w-5" onClick={()=>handleDelete(id,index)} />}
+                    {/* {`${uploadTime[index]}`} */}
+                    {/* {<Loader/>} */}
                   </td>
                 </tr>
             })}
           </tbody>
         </table>
       </Card>
+      <button onClick={()=>setIsCreating(prev=>!prev)}> ++</button>
     </div>
   );
 }

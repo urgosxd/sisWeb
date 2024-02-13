@@ -1,5 +1,4 @@
-import { AuthData } from "../../auth/AuthWrapper"
-
+import { AuthWrapper,AuthData } from "../../provider/authProvider"
 export const Account = () => {
 
      const { user } = AuthData();
