@@ -30,8 +30,9 @@ import {
   FilterFn,
   SortingFn,
   ColumnDef,
-  flexRender,
   FilterFns,
+  flexRender,
+  RowData,
 } from "@tanstack/react-table";
 
 import {
@@ -41,6 +42,7 @@ import {
 } from "@tanstack/match-sorter-utils";
 import DebouncedInput from "./debounceInput";
 import Filter from "./filter";
+import useSkipper from "../hooks/skipper";
 
 interface Props {
   isCreating: boolean;
@@ -74,6 +76,63 @@ type TourType = {
   fichasTecnicas: number[];
 };
 
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    // setData: {[key:string]:string}
+    foo:string
+  }
+}
+
+
+const defaultColumn: Partial<ColumnDef<TourType>> = {
+  cell: ({ getValue, row, column, table }) => {
+    const initialValue:string = getValue() as string
+    // We need to keep and update the state of the cell normally
+    const [value, setValue] = React.useState(initialValue)
+
+    // When the input is blurred, we'll call our table meta's updateData function
+    const onBlur = () => {
+      // table.options.meta!.setData[column.columnDef.id!] = value
+      // console.log(table.options.meta!.setData[column.columnDef.id!])
+      table.options.meta!.foo = "GAA"
+      console.log(table.options.meta!.foo )
+      console.log("AAOEAOe")
+    }
+
+
+    // If the initialValue is changed external, sync it up with our state
+    React.useEffect(() => {
+      setValue(initialValue)
+    }, [initialValue])
+
+    const setEd = (id: string) => {
+      table.setRowSelection(old => {
+        return { [id]: true }
+      })
+    }
+    return (
+      row.getIsSelected() ?
+        <td>
+          <Input
+            value={value as string}
+            onChange={e => setValue(e.target.value)}
+            onBlur={onBlur}
+          />
+        </td>
+        :
+
+        <td>
+          <div onClick={() => setEd(row.id)}>
+            {value as string}
+          </div>
+        </td>
+    )
+  },
+}
+
+
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function RowTable() {
@@ -100,7 +159,6 @@ function RowTable() {
 
   const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
     let dir = 0;
-
     // Only sort by rank if the column has ranking information
     if (rowA.columnFiltersMeta[columnId]) {
       dir = compareItems(
@@ -142,84 +200,13 @@ function RowTable() {
     fichasTecnicas: number[];
   }[] = data ? data : [];
 
-  const columns = React.useMemo<ColumnDef<TourType, any>[]>(
-    () => [
-      {
-        header: "Tour",
-        footer: (props) => props.column.id,
-        columns: [
-          {
-            accessorFn: (row) => row.ciudad,
-            id: "ciudad",
-            cell: (info) => info.getValue(),
-            header: () => <span>ciudad</span>,
-            footer: (props) => props.column.id,
-          },
-          {
-            accessorFn: (row) => row.excursion,
-            id: "excursion",
-            header: "excursion",
-            cell: (info) => info.getValue(),
-            footer: (props) => props.column.id,
-            filterFn: "fuzzy",
-            sortingFn: fuzzySort,
-          },
-          {
-            accessorFn: (row) => row.provedor,
-            id: "provedor",
-            cell: (info) => info.getValue(),
-            header: () => <span>provedor</span>,
-            footer: (props) => props.column.id,
-          },
-          {
-            accessorFn: (row) => Number(row.ppp),
-            id: "ppp",
-            cell: (info) => info.getValue(),
-            header: () => <span>ppp</span>,
-            footer: (props) => props.column.id,
-          },
-        ],
-      },
-    ],
-    []
-  );
-
-  // const initialState = { CoLU: ['id'] };
-
-  const table = useReactTable({
-    data,
-    columns,
-    filterFns: {
-      fuzzy: fuzzyFilter,
-    },
-    state: {
-      columnFilters,
-      globalFilter,
-    },
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: fuzzyFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    // debugTable: true,
-    // debugHeaders: true,
-    // debugColumns: false,
-  });
-
-  React.useEffect(() => {
-    if (table.getState().columnFilters[0]?.id === "fullName") {
-      if (table.getState().sorting[0]?.id !== "fullName") {
-        table.setSorting([{ id: "fullName", desc: false }]);
-      }
-    }
-  }, [table.getState().columnFilters[0]?.id]);
 
   const [edits, setEdites] = useState(Array.from(TABLE_ROWS, (_) => false));
+  const [rowSelection, setRowSelection] = React.useState({})
+
+  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
+  // const initialState = { CoLU: ['id'] };
+
   const [uploadTime, setUploadTime] = useState(
     Array.from(TABLE_ROWS, (_) => false)
   );
@@ -245,16 +232,16 @@ function RowTable() {
     const nextFile =
       file.length - 1 <= index
         ? file.concat(
-            Array.from(Array(index - (file.length - 1)), () => undefined).map(
-              (el, idx) => {
-                if (idx == index - (file.length - 1) - 1) {
-                  return newFile;
-                } else {
-                  return el;
-                }
+          Array.from(Array(index - (file.length - 1)), () => undefined).map(
+            (el, idx) => {
+              if (idx == index - (file.length - 1) - 1) {
+                return newFile;
+              } else {
+                return el;
               }
-            )
+            }
           )
+        )
         : [...file.slice(0, insertAt), newFile, ...file.slice(insertAt)];
     setFile(nextFile);
   };
@@ -265,12 +252,12 @@ function RowTable() {
     setFile((el) =>
       el.length > index
         ? el!.map((ele, idx) => {
-            if (idx == index) {
-              return newFile;
-            } else {
-              return ele;
-            }
-          })
+          if (idx == index) {
+            return newFile;
+          } else {
+            return ele;
+          }
+        })
         : empty
     );
   };
@@ -332,8 +319,7 @@ function RowTable() {
     formData.append("fichas", JSON.stringify(res));
     await createTour(formData);
     // setIsCreating(prev=>false)
-  };
-
+  }
   useEffect(() => {
     setFile((prev) => []);
     setIsCreating((prev) => false);
@@ -403,6 +389,237 @@ function RowTable() {
     URL.revokeObjectURL(href);
   }
 
+
+
+  const columns = React.useMemo<ColumnDef<TourType, any>[]>(
+    () => [
+      {
+        header: "Tour",
+        footer: (props) => props.column.id,
+        columns: [
+          {
+            accessorFn: (row) => row.ciudad,
+            id: "ciudad",
+            header: () => <span>ciudad</span>,
+            footer: (props) => props.column.id,
+          },
+          {
+            accessorFn: (row) => row.excursion,
+            id: "excursion",
+            header: "excursion",
+            footer: (props) => props.column.id,
+            filterFn: "fuzzy",
+            sortingFn: fuzzySort,
+          },
+          {
+            accessorFn: (row) => row.provedor,
+            id: "provedor",
+            // cell: (info) => info.getValue(),
+            header: () => <span>provedor</span>,
+            footer: (props) => props.column.id,
+          },
+          {
+            accessorFn: (row) => Number(row.ppp),
+            id: "ppp",
+            // cell: (info) => info.getValue(),
+            header: () => <span>ppp</span>,
+            footer: (props) => props.column.id,
+          },
+          {
+            accessorFn: (row) => Number(row.pvp),
+            id: "ppp",
+            // cell: (info) => info.getValue(),
+            header: () => <span>pvp</span>,
+            footer: (props) => props.column.id,
+          },
+          {
+            accessorkey: `ficha1`,
+            id: "ficha1",
+            cell: ({ getValue, row, column: { id }, table }) => {
+              // We need to keep and update the state of the cell normally
+
+              // When the input is blurred, we'll call our table meta's updateData function
+
+              // If the initialValue is changed external, sync it up with our state
+              // React.useEffect(() => {
+              //   setValue(initialValue)
+              // }, [initialValue])
+
+              return (
+                row.getIsSelected() ?
+                  <td className={"p-4 border-b border-blue-gray-50"}>
+                    <Popover>
+                      <PopoverHandler>
+                        <DocumentIcon className="w-5" />
+                      </PopoverHandler>
+                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
+                        <FileUploader
+                          handleChange={(ele: File) => handleChangeCreate(0, ele)}
+                          name="file"
+                          types={fileTypes}
+                          label="Sube o arrastra un archivo justo aqui"
+                        />
+                        {file[0] && file[0].name}
+                      </PopoverContent>
+                    </Popover>
+                  </td>
+                  :
+                  <td className="" onClick={async () => await getFichaTecnica(row.original.fichasTecnicas[0])}>
+                    <DocumentIcon className="w-5" />
+                  </td>
+              )
+            },
+
+            header: () => <span>ficha1</span>,
+            footer: (props) => props.column.id,
+
+          },
+          {
+            accessorkey: `ficha2`,
+            id: "ficha2",
+            cell: ({ getValue, row, column: { id }, table }) => {
+              // We need to keep and update the state of the cell normally
+
+              // When the input is blurred, we'll call our table meta's updateData function
+
+              // If the initialValue is changed external, sync it up with our state
+              // React.useEffect(() => {
+              //   setValue(initialValue)
+              // }, [initialValue])
+
+              return (
+                row.getIsSelected() ?
+                  <td className={"p-4 border-b border-blue-gray-50"}>
+                    <Popover>
+                      <PopoverHandler>
+                        <DocumentIcon className="w-5" />
+                      </PopoverHandler>
+                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
+                        <FileUploader
+                          handleChange={(ele: File) => handleChangeCreate(1, ele)}
+                          name="file"
+                          types={fileTypes}
+                          label="Sube o arrastra un archivo justo aqui"
+                        />
+                        {file[1] && file[1].name}
+                      </PopoverContent>
+                    </Popover>
+                  </td>
+                  :
+                  <td className="" onClick={async () => await getFichaTecnica(row.original.fichasTecnicas[1])}>
+                    <DocumentIcon className="w-5" />
+                  </td>
+              )
+            },
+
+            header: () => <span>ficha1</span>,
+            footer: (props) => props.column.id,
+
+          },
+          {
+            accessorkey: `action`,
+            id: "action",
+            cell: ({ getValue, row, column: { id }, table }) => {
+              // We need to keep and update the state of the cell normally
+
+              // When the input is blurred, we'll call our table meta's updateData function
+
+              // If the initialValue is changed external, sync it up with our state
+              // React.useEffect(() => {
+              //   setValue(initialValue)
+              // }, [initialValue])
+
+              const Edit = async () => {
+                const formObj:{[key:string]:string} = {
+                  ciudad: row.original.ciudad,
+                  excursion: row.original.excursion,
+                  provedor: row.original.excursion,
+                  ppp: row.original.ppp,
+                  pvp: row.original.pvp
+                }
+                if (file!.length > 0) {
+                  const result = await Promise.all(
+                    file!.map(async (ele) => getBase64(ele!))
+                  );
+                  const res = [];
+                  for (let idx = 0; idx < result.length; idx++) {
+                    const myFile = file?.[idx];
+                    if (myFile) {
+                      const [FileName, Extension] = getDataFromFileName(myFile.name);
+                      res.push({
+                        FileName: FileName,
+                        Extension: Extension,
+                        Doc_Content: result[idx],
+                      });
+                    } else {
+                      res.push(undefined);
+                    }
+                  }
+                  formObj["fichas"] = JSON.stringify(res);
+                }
+
+              await updateTour(row.original.id, formObj);
+
+              }
+
+              return (
+                row.getIsSelected() ?
+                  <td className={"p-4 border-b border-blue-gray-50"}>
+                    <td className="">
+                      <Input
+                        type="submit"
+                        color="blue-gray"
+                        onClick={async () =>await Edit()}
+                        className="font-medium"
+                        value="Editar"
+                      />
+
+                    </td>
+                  </td>
+                  :
+                  <td className="">
+                  </td>
+              )
+            },
+            header: () => <span>action</span>,
+          }
+        ],
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
+    state: {
+      columnFilters,
+      globalFilter,
+      rowSelection
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    defaultColumn,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: fuzzyFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    autoResetPageIndex,
+    debugTable: true,
+    // debugHeaders: true,
+    // debugColumns: false,
+  });
+
+
   return (
     <div>
       <div>
@@ -437,46 +654,46 @@ function RowTable() {
             {isLoading
               ? "aoe"
               : table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <th key={header.id} colSpan={header.colSpan}>
-                          {header.isPlaceholder ? null : (
-                            <>
-                              <div
-                                {...{
-                                  className: header.column.getCanSort()
-                                    ? "cursor-pointer select-none"
-                                    : "",
-                                  onClick:
-                                    header.column.getToggleSortingHandler(),
-                                }}
-                              >
-                                {flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                                {{
-                                  asc: " 🔼",
-                                  desc: " 🔽",
-                                }[header.column.getIsSorted() as string] ??
-                                  null}
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <th key={header.id} colSpan={header.colSpan}>
+                        {header.isPlaceholder ? null : (
+                          <>
+                            <div
+                              {...{
+                                className: header.column.getCanSort()
+                                  ? "cursor-pointer select-none"
+                                  : "",
+                                onClick:
+                                  header.column.getToggleSortingHandler(),
+                              }}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                              {{
+                                asc: " 🔼",
+                                desc: " 🔽",
+                              }[header.column.getIsSorted() as string] ??
+                                null}
+                            </div>
+                            {header.column.getCanFilter() ? (
+                              <div>
+                                <Filter
+                                  column={header.column}
+                                  table={table}
+                                />
                               </div>
-                              {header.column.getCanFilter() ? (
-                                <div>
-                                  <Filter
-                                    column={header.column}
-                                    table={table}
-                                  />
-                                </div>
-                              ) : null}
-                            </>
-                          )}
-                        </th>
-                      );
-                    })}
-                  </tr>
-                ))}
+                            ) : null}
+                          </>
+                        )}
+                      </th>
+                    );
+                  })}
+                </tr>
+              ))}
           </thead>
           <tbody>
             {<form id="CreateForm" onSubmit={createForm}></form>}
@@ -817,72 +1034,38 @@ function RowTable() {
             {isLoading
               ? "aoe"
               : table.getRowModel().rows.map((row, index) => {
-                  console.log(row);
-                  return edits[index] ? (
-                    <tr key={row.id}>
-                      {
-                        <form
-                          ref={myForm}
-                          id="subForm"
-                          onSubmit={(el) =>
-                            updateForm(row.original.id, el, index)
-                          }
-                        ></form>
-                      }
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <td key={cell.id}>
-                          <Input 
+                console.log(row);
+                return (
+                  <tr key={row.id}>
+                    {/* { */}
+                    {/*   <form */}
+                    {/*     ref={myForm} */}
+                    {/*     id="subForm" */}
+                    {/*     onSubmit={(el) => */}
+                    {/*       updateForm(row.original.id, el, index) */}
+                    {/*     } */}
+                    {/*   ></form> */}
+                    {/* } */}
+                    {row.getVisibleCells().map((cell) => {
+                      return (
+                        <td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
 
-            type="text" 
-                      // value={ciudad}
-                      // defaultValue={flexRender(
-                      //         cell.column.columnDef.cell,
-                      //         cell.getContext()
-                      //       )}
-                      name="ppp"
-                      form="subForm"
-                      placeholder="ppp"
-                      className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
-                      labelProps={{
-                        className: "hidden",
-                      }}
-                      containerProps={{ className: "min-w-[100px]" }}
-                            />
-
-                            {}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ) : (
-                    <tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <td key={cell.id}>
-                            <Typography
-                              as="a"
-                              href="#"
-                              variant="small"
-                              color="blue-gray"
-                              onClick={() => editChangeById(index)}
-                              className="font-medium "
-                            >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </Typography>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )
+              })}
           </tbody>
         </table>
       </Card>
       <button onClick={() => setIsCreating((prev) => !prev)}> ++</button>
+      <pre>{JSON.stringify(table.getState().rowSelection, null, 2)}</pre>
+      <pre>{table.options.meta && JSON.stringify(table.options.meta!.setData, null, 2)}</pre>
     </div>
   );
 }
