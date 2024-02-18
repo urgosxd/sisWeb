@@ -10,7 +10,7 @@ import {
   PopoverHandler,
   PopoverContent,
 } from "@material-tailwind/react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
 import { createTour, deleteTour, getFicha, updateTour } from "../lib/api";
 import { FileUploader } from "react-drag-drop-files";
 import Loader from "./spinner";
@@ -45,17 +45,7 @@ import Filter from "./filter";
 import useSkipper from "../hooks/skipper";
 
 interface Props {
-  isCreating: boolean;
-  TABLE_HEAD: string[];
-  TABLE_ROWS: {
-    id: number;
-    ciudad: string;
-    excursion: string;
-    provedor: string;
-    ppp: string;
-    pvp: string;
-    fichasTecnicas: number[];
-  }[];
+  permission: boolean;
 }
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -76,66 +66,63 @@ type TourType = {
   fichasTecnicas: number[];
 };
 
+type TourJSONType = {
+  [key: string]: string;
+};
 
-declare module '@tanstack/react-table' {
+declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     // setData: {[key:string]:string}
-    foo:string
+    edits: boolean[];
+    setEdites: React.Dispatch<React.SetStateAction<boolean[]>>;
+    tempEditData: TourJSONType;
+    uploadTime: boolean[];
+    setUploadTime: React.Dispatch<React.SetStateAction<boolean[]>>;
+    uploadTimeDel: boolean[];
+    setUploadTimeDel: React.Dispatch<React.SetStateAction<boolean[]>>;
   }
 }
-
-
+// const aoeu =() => {
+//       tableMeta?.setEdites((el) => el.map((ele, idx) => (idx == row.index ? !ele : false)))
+//     }
 const defaultColumn: Partial<ColumnDef<TourType>> = {
   cell: ({ getValue, row, column, table }) => {
-    const initialValue:string = getValue() as string
-    // We need to keep and update the state of the cell normally
-    const [value, setValue] = React.useState(initialValue)
-
     // When the input is blurred, we'll call our table meta's updateData function
+
+    let initialValue = getValue() as string;
+    // if(column.id == "ppp"){
+    //   initialValue = row.original.ppp
+    // }
+    const columnMeta = column.columnDef.meta;
+    const tableMeta = table.options.meta;
+    const [value, setValue] = useState(initialValue);
+    useEffect(() => {
+      setValue(initialValue);
+    }, [initialValue]);
     const onBlur = () => {
-      // table.options.meta!.setData[column.columnDef.id!] = value
-      // console.log(table.options.meta!.setData[column.columnDef.id!])
-      table.options.meta!.foo = "GAA"
-      console.log(table.options.meta!.foo )
-      console.log("AAOEAOe")
-    }
+      const idx = column.id;
+      tableMeta!.tempEditData[idx] = value;
+    };
 
-
-    // If the initialValue is changed external, sync it up with our state
-    React.useEffect(() => {
-      setValue(initialValue)
-    }, [initialValue])
-
-    const setEd = (id: string) => {
-      table.setRowSelection(old => {
-        return { [id]: true }
-      })
-    }
-    return (
-      row.getIsSelected() ?
-        <td>
-          <Input
-            value={value as string}
-            onChange={e => setValue(e.target.value)}
-            onBlur={onBlur}
-          />
-        </td>
-        :
-
-        <td>
-          <div onClick={() => setEd(row.id)}>
-            {value as string}
-          </div>
-        </td>
-    )
+    return tableMeta?.edits[row.index] ? (
+      <td>
+        <Input
+          value={value as string}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={onBlur}
+        />
+      </td>
+    ) : (
+      <td>
+        <div>{initialValue as string}</div>
+      </td>
+    );
   },
-}
-
-
+};
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function RowTable() {
+function RowTable({ permission }: Props) {
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     "http://127.0.0.1:8000/apiCrud/tours/tour/",
@@ -177,90 +164,45 @@ function RowTable() {
 
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const TABLE_HEAD = [
-    "Ciudad",
-    "Excursion",
-    "Proveedor",
-    "ppp",
-    "pvp",
-    "pdf",
-    "",
-    "edit",
-    "",
-    "eliminar",
-  ];
-
-  const TABLE_ROWS: {
-    id: number;
-    ciudad: string;
-    excursion: string;
-    provedor: string;
-    ppp: string;
-    pvp: string;
-    fichasTecnicas: number[];
-  }[] = data ? data : [];
+ 
 
 
-  const [edits, setEdites] = useState(Array.from(TABLE_ROWS, (_) => false));
-  const [rowSelection, setRowSelection] = React.useState({})
-
-  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
-  // const initialState = { CoLU: ['id'] };
+  const [edits, setEdites] = useState(Array.from(data || [], (_) => false));
 
   const [uploadTime, setUploadTime] = useState(
-    Array.from(TABLE_ROWS, (_) => false)
+    Array.from(data || [], (_) => false)
+  );
+  const [uploadTimeDel, setUploadTimeDel] = useState(
+    Array.from(data || [], (_) => false)
   );
   const [createUpload, setCreateUpload] = useState(false);
 
   const fileTypes = ["PDF"];
-
-  const editChangeById = (id: number) => {
-    setEdites((el) => el.map((ele, idx) => (idx == id ? !ele : false)));
-  };
 
   const [file, setFile] = useState<Array<File | undefined>>([]);
 
   const [isCreating, setIsCreating] = useState(false);
   // const [isDeleting,setIsDeleting] = useState(false)
 
-  const handleDelete = async (id: number, idxx: number) => {
-    setUploadTime((el) => el.map((ele, idx) => (idx == idxx ? true : false)));
-    await deleteForm(id);
-  };
   const handleChangeCreate = (index: number, newFile: File) => {
     const insertAt = index;
     const nextFile =
       file.length - 1 <= index
         ? file.concat(
-          Array.from(Array(index - (file.length - 1)), () => undefined).map(
-            (el, idx) => {
-              if (idx == index - (file.length - 1) - 1) {
-                return newFile;
-              } else {
-                return el;
+            Array.from(Array(index - (file.length - 1)), () => undefined).map(
+              (el, idx) => {
+                if (idx == index - (file.length - 1) - 1) {
+                  return newFile;
+                } else {
+                  return el;
+                }
               }
-            }
+            )
           )
-        )
         : [...file.slice(0, insertAt), newFile, ...file.slice(insertAt)];
     setFile(nextFile);
   };
 
-  const handleChangeUpdate = (index: number, newFile: File) => {
-    const empty: Array<File | undefined> = [];
-    empty[index] = newFile;
-    setFile((el) =>
-      el.length > index
-        ? el!.map((ele, idx) => {
-          if (idx == index) {
-            return newFile;
-          } else {
-            return ele;
-          }
-        })
-        : empty
-    );
-  };
   const myForm = useRef<HTMLFormElement | null>(null);
 
   function getDataFromFileName(path: string) {
@@ -318,56 +260,15 @@ function RowTable() {
     formData.append("pvp", e.target.pvp.value);
     formData.append("fichas", JSON.stringify(res));
     await createTour(formData);
-    // setIsCreating(prev=>false)
-  }
+  };
   useEffect(() => {
     setFile((prev) => []);
     setIsCreating((prev) => false);
     setCreateUpload((prev) => false);
-    setUploadTime((prev) => Array.from(TABLE_ROWS, (_) => false));
-    setEdites((prev) => Array.from(TABLE_ROWS, (_) => false));
+    setUploadTime((prev) => Array.from(data || [],(_) => false))
+    setUploadTimeDel((prev) => Array.from(data || [],(_) => false))
+    setEdites((prev) => Array.from(data || [], (_) => false));
   }, [data]);
-
-  console.log(file);
-
-  const updateForm = async (id: number, e, index: number) => {
-    e.preventDefault();
-
-    setUploadTime((el) => el.map((ele, idx) => (idx == index ? true : false)));
-    let formData = new FormData(myForm.current!);
-    const newFormObject: { [key: string]: string } = {};
-
-    formData.forEach((value, key) => {
-      newFormObject[key] = value.toString();
-    });
-
-    if (file!.length > 0) {
-      const result = await Promise.all(
-        file!.map(async (ele) => getBase64(ele!))
-      );
-      const res = [];
-      for (let idx = 0; idx < result.length; idx++) {
-        const myFile = file?.[idx];
-        if (myFile) {
-          const [FileName, Extension] = getDataFromFileName(myFile.name);
-          res.push({
-            FileName: FileName,
-            Extension: Extension,
-            Doc_Content: result[idx],
-          });
-        } else {
-          res.push(undefined);
-        }
-      }
-      newFormObject["fichas"] = JSON.stringify(res);
-    }
-
-    await updateTour(id, newFormObject);
-  };
-
-  const deleteForm = async (id: number) => {
-    await deleteTour(id);
-  };
 
   async function getFichaTecnica(id: number) {
     const data = await getFicha(id);
@@ -388,8 +289,6 @@ function RowTable() {
     document.body.removeChild(link);
     URL.revokeObjectURL(href);
   }
-
-
 
   const columns = React.useMemo<ColumnDef<TourType, any>[]>(
     () => [
@@ -427,7 +326,7 @@ function RowTable() {
           },
           {
             accessorFn: (row) => Number(row.pvp),
-            id: "ppp",
+            id: "pvp",
             // cell: (info) => info.getValue(),
             header: () => <span>pvp</span>,
             footer: (props) => props.column.id,
@@ -436,107 +335,98 @@ function RowTable() {
             accessorkey: `ficha1`,
             id: "ficha1",
             cell: ({ getValue, row, column: { id }, table }) => {
-              // We need to keep and update the state of the cell normally
-
-              // When the input is blurred, we'll call our table meta's updateData function
-
-              // If the initialValue is changed external, sync it up with our state
-              // React.useEffect(() => {
-              //   setValue(initialValue)
-              // }, [initialValue])
-
-              return (
-                row.getIsSelected() ?
-                  <td className={"p-4 border-b border-blue-gray-50"}>
-                    <Popover>
-                      <PopoverHandler>
-                        <DocumentIcon className="w-5" />
-                      </PopoverHandler>
-                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
-                        <FileUploader
-                          handleChange={(ele: File) => handleChangeCreate(0, ele)}
-                          name="file"
-                          types={fileTypes}
-                          label="Sube o arrastra un archivo justo aqui"
-                        />
-                        {file[0] && file[0].name}
-                      </PopoverContent>
-                    </Popover>
-                  </td>
-                  :
-                  <td className="" onClick={async () => await getFichaTecnica(row.original.fichasTecnicas[0])}>
-                    <DocumentIcon className="w-5" />
-                  </td>
-              )
+              const tableMeta = table.options.meta;
+              return tableMeta?.edits[row.index] ? (
+                <td className={"p-4 border-b border-blue-gray-50"}>
+                  <Popover>
+                    <PopoverHandler>
+                      <DocumentIcon className="w-5" />
+                    </PopoverHandler>
+                    <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
+                      <FileUploader
+                        handleChange={(ele: File) => handleChangeCreate(0, ele)}
+                        name="file"
+                        types={fileTypes}
+                        label="Sube o arrastra un archivo justo aqui"
+                      />
+                      {file[0] && file[0].name}
+                    </PopoverContent>
+                  </Popover>
+                </td>
+              ) : (
+                <td
+                  className=""
+                  onClick={async () =>
+                    await getFichaTecnica(row.original.fichasTecnicas[0])
+                  }
+                >
+                  <DocumentIcon className="w-5" />
+                </td>
+              );
             },
 
             header: () => <span>ficha1</span>,
             footer: (props) => props.column.id,
-
           },
           {
             accessorkey: `ficha2`,
             id: "ficha2",
             cell: ({ getValue, row, column: { id }, table }) => {
-              // We need to keep and update the state of the cell normally
-
-              // When the input is blurred, we'll call our table meta's updateData function
-
-              // If the initialValue is changed external, sync it up with our state
-              // React.useEffect(() => {
-              //   setValue(initialValue)
-              // }, [initialValue])
-
-              return (
-                row.getIsSelected() ?
-                  <td className={"p-4 border-b border-blue-gray-50"}>
-                    <Popover>
-                      <PopoverHandler>
-                        <DocumentIcon className="w-5" />
-                      </PopoverHandler>
-                      <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
-                        <FileUploader
-                          handleChange={(ele: File) => handleChangeCreate(1, ele)}
-                          name="file"
-                          types={fileTypes}
-                          label="Sube o arrastra un archivo justo aqui"
-                        />
-                        {file[1] && file[1].name}
-                      </PopoverContent>
-                    </Popover>
-                  </td>
-                  :
-                  <td className="" onClick={async () => await getFichaTecnica(row.original.fichasTecnicas[1])}>
-                    <DocumentIcon className="w-5" />
-                  </td>
-              )
+              const tableMeta = table.options.meta;
+              return tableMeta?.edits[row.index] ? (
+                <td className={"p-4 border-b border-blue-gray-50"}>
+                  <Popover>
+                    <PopoverHandler>
+                      <DocumentIcon className="w-5" />
+                    </PopoverHandler>
+                    <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
+                      <FileUploader
+                        handleChange={(ele: File) => handleChangeCreate(1, ele)}
+                        name="file"
+                        types={fileTypes}
+                        label="Sube o arrastra un archivo justo aqui"
+                      />
+                      {file[1] && file[1].name}
+                    </PopoverContent>
+                  </Popover>
+                </td>
+              ) : (
+                <td
+                  className=""
+                  onClick={async () =>
+                    await getFichaTecnica(row.original.fichasTecnicas[1])
+                  }
+                >
+                  <DocumentIcon className="w-5" />
+                </td>
+              );
             },
 
-            header: () => <span>ficha1</span>,
+            header: () => <span>ficha2</span>,
             footer: (props) => props.column.id,
-
           },
           {
             accessorkey: `action`,
             id: "action",
             cell: ({ getValue, row, column: { id }, table }) => {
-              // We need to keep and update the state of the cell normally
 
-              // When the input is blurred, we'll call our table meta's updateData function
+              const Editable = () => {
+                table.options.meta?.setEdites((el) =>
+                  el.map((ele, idx) => (idx == row.index ? !ele : false))
+                );
+              };
 
-              // If the initialValue is changed external, sync it up with our state
-              // React.useEffect(() => {
-              //   setValue(initialValue)
-              // }, [initialValue])
+              const Cancel = () => {
+                table.options.meta?.setEdites((el) =>
+                  el.map((ele, idx) => false)
+                );
+              };
 
               const Edit = async () => {
-                const formObj:{[key:string]:string} = {
-                  ciudad: row.original.ciudad,
-                  excursion: row.original.excursion,
-                  provedor: row.original.excursion,
-                  ppp: row.original.ppp,
-                  pvp: row.original.pvp
-                }
+                table.options.meta?.setUploadTime((el) =>
+                  el.map((ele, idx) => (idx == row.index ? true : false))
+                );
+                const formObj = table.options.meta?.tempEditData;
                 if (file!.length > 0) {
                   const result = await Promise.all(
                     file!.map(async (ele) => getBase64(ele!))
@@ -545,7 +435,9 @@ function RowTable() {
                   for (let idx = 0; idx < result.length; idx++) {
                     const myFile = file?.[idx];
                     if (myFile) {
-                      const [FileName, Extension] = getDataFromFileName(myFile.name);
+                      const [FileName, Extension] = getDataFromFileName(
+                        myFile.name
+                      );
                       res.push({
                         FileName: FileName,
                         Extension: Extension,
@@ -555,34 +447,80 @@ function RowTable() {
                       res.push(undefined);
                     }
                   }
-                  formObj["fichas"] = JSON.stringify(res);
+                  formObj!["fichas"] = JSON.stringify(res);
                 }
 
-              await updateTour(row.original.id, formObj);
+                const ga = await updateTour(row.original.id, formObj);
+                return;
+              };
+             
 
-              }
-
+              const meta = table.options.meta;
               return (
-                row.getIsSelected() ?
-                  <td className={"p-4 border-b border-blue-gray-50"}>
-                    <td className="">
-                      <Input
-                        type="submit"
-                        color="blue-gray"
-                        onClick={async () =>await Edit()}
-                        className="font-medium"
-                        value="Editar"
-                      />
-
+                <div className="edit-cell-container">
+                  {meta?.edits[row.index] ? (
+                    <div className="edit-cell">
+                      <button onClick={Cancel} name="cancel">
+                        X
+                      </button>
+                      {meta.uploadTime[row.index] ? (
+                        <Loader />
+                      ) : (
+                        <button onClick={Edit} name="done">
+                          ✔
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <td>
+                      {permission ? (
+                        <button onClick={Editable} name="edit">
+                          ✐
+                        </button>
+                      ) : (
+                        <div></div>
+                      )}
                     </td>
-                  </td>
-                  :
-                  <td className="">
-                  </td>
-              )
+                  )}
+                </div>
+              );
             },
             header: () => <span>action</span>,
-          }
+          },
+          {
+            id: "delete",
+            cell: ({ getValue, row, column: { id }, table }) => {
+              const Delete = async () => {
+                // console.log(TABLE_ROWS.length)
+                table.options.meta?.setUploadTimeDel((el) =>
+                  el.map((ele, idx) => (idx == row.index ? true : ele))
+                );
+                
+                await deleteTour(row.original.id);
+              };
+
+              React.useEffect(() => {
+                console.log(data.length)
+                  table.options.meta?.setUploadTimeDel((el) =>
+                  el.map((ele, idx) => (idx == row.index ? false : ele)).concat([false])
+                );
+              }, [data]);
+
+              return (
+                permission && (
+                  <td>
+                    {table.options.meta?.uploadTimeDel[row.index] ? (
+                      <Loader />
+                    ) : (
+                      <TrashIcon className="w-5" onClick={Delete} />
+                    )}
+                  </td>
+                )
+              );
+            },
+
+            header: () => <span></span>,
+          },
         ],
       },
     ],
@@ -598,10 +536,16 @@ function RowTable() {
     state: {
       columnFilters,
       globalFilter,
-      rowSelection
     },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
+    meta: {
+      edits,
+      setEdites,
+      tempEditData: {},
+      uploadTime,
+      setUploadTime,
+      uploadTimeDel,
+      setUploadTimeDel
+    },
     defaultColumn,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
@@ -613,12 +557,10 @@ function RowTable() {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    autoResetPageIndex,
     debugTable: true,
     // debugHeaders: true,
     // debugColumns: false,
   });
-
 
   return (
     <div>
@@ -633,71 +575,53 @@ function RowTable() {
       <Card className="h-full w-full overflow-scroll">
         <table className="w-full min-w-max table-auto text-left">
           <thead>
-            {/* <tr> */}
-            {/*   {TABLE_HEAD.map((head) => ( */}
-            {/*     <th */}
-            {/*       key={head} */}
-            {/*       className="border-b border-blue-gray-100 bg-blue-gray-50 p-4" */}
-            {/*     > */}
-            {/*       <Typography */}
-            {/*         variant="small" */}
-            {/*         color="blue-gray" */}
-            {/*         className="font-normal leading-none opacity-70" */}
-            {/*       > */}
-            {/*         {head} */}
-            {/*       </Typography> */}
-            {/*     </th> */}
-            {/*   )) */}
-            {/* } */}
-            {/* </tr> */}
-
             {isLoading
               ? "aoe"
               : table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <th key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder ? null : (
-                          <>
-                            <div
-                              {...{
-                                className: header.column.getCanSort()
-                                  ? "cursor-pointer select-none"
-                                  : "",
-                                onClick:
-                                  header.column.getToggleSortingHandler(),
-                              }}
-                            >
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                              {{
-                                asc: " 🔼",
-                                desc: " 🔽",
-                              }[header.column.getIsSorted() as string] ??
-                                null}
-                            </div>
-                            {header.column.getCanFilter() ? (
-                              <div>
-                                <Filter
-                                  column={header.column}
-                                  table={table}
-                                />
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <th key={header.id} colSpan={header.colSpan}>
+                          {header.isPlaceholder ? null : (
+                            <>
+                              <div
+                                {...{
+                                  className: header.column.getCanSort()
+                                    ? "cursor-pointer select-none"
+                                    : "",
+                                  onClick:
+                                    header.column.getToggleSortingHandler(),
+                                }}
+                              >
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                                {{
+                                  asc: " 🔼",
+                                  desc: " 🔽",
+                                }[header.column.getIsSorted() as string] ??
+                                  null}
                               </div>
-                            ) : null}
-                          </>
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
+                              {header.column.getCanFilter() ? (
+                                <div>
+                                  <Filter
+                                    column={header.column}
+                                    table={table}
+                                  />
+                                </div>
+                              ) : null}
+                            </>
+                          )}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                ))}
           </thead>
           <tbody>
             {<form id="CreateForm" onSubmit={createForm}></form>}
-            {isCreating && (
+            {permission && isCreating && (
               <tr>
                 <td className={"p-4 border-b border-blue-gray-50"}>
                   <Input
@@ -824,248 +748,29 @@ function RowTable() {
                 </td>
               </tr>
             )}
-            {/* {isLoading ? "loaddd" :  TABLE_ROWS.map(({ id, ciudad, excursion, provedor, ppp, pvp, fichasTecnicas }, index) => { */}
-            {/*   const isLast = index === TABLE_ROWS.length - 1; */}
-            {/*   const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50"; */}
-            {/*   return edits[index] ? */}
-
-            {/*     <tr key={id}> */}
-            {/*       {<form ref={myForm} id="subForm" onSubmit={el => updateForm(id, el,index)}></form>} */}
-            {/*       <td className={classes}> */}
-            {/*         <Input */}
-            {/*           type="text" */}
-            {/*           // value={ciudad} */}
-            {/*           defaultValue={ciudad} */}
-            {/*           name="ciudad" */}
-            {/*           form="subForm" */}
-            {/*           placeholder="ciudad" */}
-            {/*           className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10" */}
-            {/*           labelProps={{ */}
-            {/*             className: "hidden", */}
-            {/*           }} */}
-            {/*           containerProps={{ className: "min-w-[100px]" }} */}
-            {/*         /> */}
-            {/*       </td> */}
-            {/*       <td className={classes}> */}
-            {/*         <Input */}
-            {/*           type="text" */}
-            {/*           // value={ciudad} */}
-            {/*           defaultValue={excursion} */}
-            {/*           name="excursion" */}
-            {/*           form="subForm" */}
-            {/*           placeholder="excursion" */}
-            {/*           className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10" */}
-            {/*           labelProps={{ */}
-            {/*             className: "hidden", */}
-            {/*           }} */}
-            {/*           containerProps={{ className: "min-w-[100px]" }} */}
-            {/*         /> */}
-            {/*       </td> */}
-            {/*       <td className={classes}> */}
-            {/*         <Input */}
-            {/*           type="text" */}
-            {/*           // value={ciudad} */}
-            {/*           defaultValue={provedor} */}
-            {/*           placeholder="proveedor" */}
-            {/*           className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10" */}
-            {/*           labelProps={{ */}
-            {/*             className: "hidden", */}
-            {/*           }} */}
-            {/*           containerProps={{ className: "min-w-[100px]" }} */}
-            {/*         /> */}
-            {/*       </td> */}
-            {/*       <td className={classes}> */}
-            {/*         <Input */}
-            {/*           type="text" */}
-            {/*           // value={ciudad} */}
-            {/*           defaultValue={ppp} */}
-            {/*           name="ppp" */}
-            {/*           form="subForm" */}
-            {/*           placeholder="ppp" */}
-            {/*           className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10" */}
-            {/*           labelProps={{ */}
-            {/*             className: "hidden", */}
-            {/*           }} */}
-            {/*           containerProps={{ className: "min-w-[100px]" }} */}
-            {/*         /> */}
-            {/*       </td> */}
-
-            {/*       <td className={classes}> */}
-            {/*         <Input */}
-            {/*           type="text" */}
-            {/*           // value={ciudad} */}
-            {/*           defaultValue={pvp} */}
-            {/*           name="pvp" */}
-            {/*           form="subForm" */}
-            {/*           placeholder="pvp" */}
-            {/*           className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10" */}
-            {/*           labelProps={{ */}
-            {/*             className: "hidden", */}
-            {/*           }} */}
-            {/*           containerProps={{ className: "min-w-[100px]" }} */}
-            {/*         /> */}
-            {/*       </td> */}
-            {/*       <td className={classes}> */}
-            {/*         <Popover> */}
-            {/*           <PopoverHandler> */}
-            {/*             <DocumentIcon className="w-5" /> */}
-            {/*           </PopoverHandler> */}
-            {/*           <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0"> */}
-
-            {/*             <FileUploader handleChange={(e: File) => handleChangeCreate(0, e)} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" /> */}
-            {/*             {file[0] && file[0].name} */}
-            {/*           </PopoverContent> */}
-            {/*         </Popover> */}
-            {/*       </td> */}
-            {/*       <td className={classes}> */}
-            {/*         <Popover> */}
-            {/*           <PopoverHandler> */}
-            {/*             <DocumentIcon className="w-5" /> */}
-            {/*           </PopoverHandler> */}
-            {/*           <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0"> */}
-
-            {/*             <FileUploader handleChange={(e: File) => handleChangeCreate(1, e)} name="file" types={fileTypes} label="Sube o arrastra un archivo justo aqui" /> */}
-
-            {/*             {file[1] && file[1].name} */}
-            {/*           </PopoverContent> */}
-            {/*         </Popover> */}
-            {/*       </td> */}
-
-            {/*       <td className=""> */}
-            {/*         { uploadTime[index] ? <Loader/> : */}
-            {/*         <Input */}
-            {/*           type="submit" */}
-            {/*           color="blue-gray" */}
-            {/*           form="subForm" */}
-            {/*           className="font-medium" */}
-            {/*           value="Editar" */}
-            {/*         /> */}
-
-            {/*       } */}
-            {/*       </td> */}
-            {/*          */}
-            {/*     </tr> */}
-            {/*     : <tr key={ciudad}> */}
-            {/*       <td className={classes} onClick={() => editChangeById(index)}> */}
-            {/*         <Typography */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           className="font-normal w-[200px] px-[13px] py-[11px]" */}
-            {/*         > */}
-            {/*           {ciudad} */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-            {/*       <td className={classes} onClick={() => editChangeById(index)}> */}
-            {/*         <Typography */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           className="font-normal w-[200px] px-[13px] py-[11px]" */}
-            {/*         > */}
-            {/*           {excursion} */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-
-            {/*       <td className={classes} onClick={() => editChangeById(index)}> */}
-            {/*         <Typography */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           className="font-normal w-[200px] px-[13px] py-[11px]" */}
-            {/*         > */}
-            {/*           {provedor} */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-            {/*       <td className={classes} onClick={() => editChangeById(index)}> */}
-            {/*         <Typography */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           className="font-normal w-[200px] px-[13px] py-[11px]" */}
-            {/*         > */}
-            {/*           {ppp} */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-            {/*       <td className={classes} onClick={() => editChangeById(index)}> */}
-            {/*         <Typography */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           className="font-normal w-[200px] px-[13px] py-[11px]" */}
-            {/*         > */}
-            {/*           {pvp} */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-            {/*       <td className={classes} onClick={async () =>await getFichaTecnica(fichasTecnicas[0])}> */}
-            {/*             <DocumentIcon className="w-5" /> */}
-            {/*       </td> */}
-
-            {/*       <td className={classes} onClick={async () => await  getFichaTecnica(fichasTecnicas[1])}> */}
-            {/*             <DocumentIcon className="w-5" /> */}
-            {/*       </td> */}
-
-            {/*       <td className={classes}> */}
-            {/*         <Typography */}
-            {/*           as="a" */}
-            {/*           href="#" */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           onClick={() => editChangeById(index)} */}
-            {/*           className="font-medium " */}
-            {/*         > */}
-            {/*            */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-            {/*        <td className={classes}> */}
-            {/*         <Typography */}
-            {/*           as="a" */}
-            {/*           href="#" */}
-            {/*           variant="small" */}
-            {/*           color="blue-gray" */}
-            {/*           onClick={() => editChangeById(index)} */}
-            {/*           className="font-medium " */}
-            {/*         > */}
-            {/*         </Typography> */}
-            {/*       </td> */}
-            {/*         <td className={classes}> */}
-            {/*          {uploadTime[index] ? <Loader/> : <TrashIcon className="w-5" onClick={()=>handleDelete(id,index)} />} */}
-            {/*     */}
-            {/*        */}
-            {/*       </td> */}
-            {/*     </tr> */}
-            {/* })} */}
-
             {isLoading
               ? "aoe"
               : table.getRowModel().rows.map((row, index) => {
-                console.log(row);
-                return (
-                  <tr key={row.id}>
-                    {/* { */}
-                    {/*   <form */}
-                    {/*     ref={myForm} */}
-                    {/*     id="subForm" */}
-                    {/*     onSubmit={(el) => */}
-                    {/*       updateForm(row.original.id, el, index) */}
-                    {/*     } */}
-                    {/*   ></form> */}
-                    {/* } */}
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-
-                        </td>
-                      );
-                    })}
-                  </tr>
-                )
-              })}
+                  console.log(row);
+                  return (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <td key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
           </tbody>
         </table>
       </Card>
       <button onClick={() => setIsCreating((prev) => !prev)}> ++</button>
-      <pre>{JSON.stringify(table.getState().rowSelection, null, 2)}</pre>
-      <pre>{table.options.meta && JSON.stringify(table.options.meta!.setData, null, 2)}</pre>
     </div>
   );
 }
