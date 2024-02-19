@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
+    RenderInfo,
   RenderMenu,
   RenderRoutes,
 } from "../components/structure/RenderNavigation";
@@ -12,6 +13,7 @@ import {
   Tab,
   TabPanel,
 } from "@material-tailwind/react";
+import { NavigationDash } from "../components/structure/drawer";
 
 const BASEURL = "http://127.0.0.1:8000/";
 
@@ -33,6 +35,8 @@ export const AuthWrapper = () => {
         }
       : { name: "", isAuthenticated: false, role: "" }
   );
+
+  const [currencyRate,setCurrencyRate] = useState(1)
 
   // const history = useHistory()
   // const router = useNavigate()
@@ -60,7 +64,7 @@ export const AuthWrapper = () => {
         role: data.user.role,
       });
       localStorage.setItem("authTokens", JSON.stringify(data));
-      navigate("/");
+      navigate("/tour");
     } else {
       alert("Something went wrong!");
     }
@@ -97,8 +101,6 @@ export const AuthWrapper = () => {
     } else {
       logoutUser();
     }
-
-    
   };
 
   let contextData = {
@@ -106,6 +108,8 @@ export const AuthWrapper = () => {
     authTokens: authTokens,
     login: loginUser,
     logout: logoutUser,
+    currencyRate:currencyRate,
+    setCurrencyRate:setCurrencyRate
   };
 
   useEffect(() => {
@@ -123,16 +127,23 @@ export const AuthWrapper = () => {
   return (
     <AuthContext.Provider value={contextData}>
       <>
-        
-      {/* <RenderInfo/> */}
-        <Tabs value="home" orientation="vertical">
-          <TabsHeader className="w-32">
-            <RenderMenu />
-          </TabsHeader>
-          <TabsBody>
-            <RenderRoutes />
-          </TabsBody>
-        </Tabs>
+        {/* <RenderInfo/> */}
+        {/* <Tabs value="cambio" orientation="vertical"> */}
+        {/*   <TabsHeader className="w-56"> */}
+        {/*     <RenderMenu /> */}
+        {/*   </TabsHeader> */}
+        {/*   <TabsBody> */}
+        {/*     <RenderRoutes /> */}
+        {/*   </TabsBody> */}
+        {/* </Tabs> */}
+        {
+          user.isAuthenticated ?
+        <NavigationDash>
+          <RenderRoutes/>
+        </NavigationDash>
+        : <RenderRoutes/>
+          
+      }
       </>
     </AuthContext.Provider>
   );

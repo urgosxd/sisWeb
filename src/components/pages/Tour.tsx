@@ -7,7 +7,7 @@ import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { RenderInfo } from "../structure/RenderNavigation";
 
-export const Home = () => {
+export const Tour = () => {
   // const notification = useSWR(
   //   // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
   //   "http://127.0.0.1:8000/apiCrud/notification/notification/",
@@ -16,7 +16,7 @@ export const Home = () => {
   // );
 
   
-    const {user} = AuthData() as AuthProviderType
+    const {user,currencyRate} = AuthData() as AuthProviderType
 
   if(!user.isAuthenticated){
    const ga = useNavigate()
@@ -25,12 +25,16 @@ export const Home = () => {
 
 
 
+    
 
   return (
     <div> 
-      {/* <RenderInfo/> */}
+        <Typography>
+        TOURS
+        </Typography>
+      {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast/>
-      <RowTable permission={user.role == "Ventas" ? false:true}/>
+      <RowTable permission={user.role == "Ventas" ? false:true} url={"http://127.0.0.1:8000/apiCrud/tours/tour/"} />
     </div>
   );
 }

@@ -4,5 +4,8 @@ export type AuthProviderType = {
   authTokens: any
     login:(e)=>Promise<void>
     logout:()=>void
+    currencyRate:number
+    setCurrencyRate:React.Dispatch<React.SetStateAction<number>>
+
 
 }

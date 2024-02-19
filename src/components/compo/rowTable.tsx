@@ -43,9 +43,12 @@ import {
 import DebouncedInput from "./debounceInput";
 import Filter from "./filter";
 import useSkipper from "../hooks/skipper";
+import HeaderTable from "./headerTable";
 
 interface Props {
   permission: boolean;
+  url:string
+  currency:number
 }
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -62,7 +65,9 @@ type TourType = {
   excursion: string;
   provedor: string;
   ppp: string;
+  ppe: string;
   pvp: string;
+  pve: string;
   fichasTecnicas: number[];
 };
 
@@ -105,27 +110,29 @@ const defaultColumn: Partial<ColumnDef<TourType>> = {
     };
 
     return tableMeta?.edits[row.index] ? (
-      <td>
+      <div className="w-36">
         <Input
+          type={typeof initialValue === 'number' ? "number":"text"}
           value={value as string}
           onChange={(e) => setValue(e.target.value)}
           onBlur={onBlur}
+          containerProps={{
+          className: "min-w-0",
+        }}
         />
-      </td>
+      </div>
     ) : (
-      <td>
         <div>{initialValue as string}</div>
-      </td>
     );
   },
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function RowTable({ permission }: Props) {
+function RowTable({ permission, url }: Props) {
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
-    "http://127.0.0.1:8000/apiCrud/tours/tour/",
+    url,
     fetcher,
     { refreshInterval: 10 }
     // fetcher
@@ -232,11 +239,8 @@ function RowTable({ permission }: Props) {
     if (file.includes(undefined)) {
       return;
     }
-
     // const preBlobs = await Promise.all(file!.map(ele=> ele.arrayBuffer()))
-
     // const blobs = preBlobs?.map((ele,idx)=> new Blob( [new Uint8Array(ele)],{type: file![idx].type }))
-
     // const blob = new Blob([new Uint8Array(preBlob)],{type: file!.type})
 
     const result = await Promise.all(file!.map(async (ele) => getBase64(ele!)));
@@ -251,16 +255,21 @@ function RowTable({ permission }: Props) {
         Doc_Content: result[idx],
       });
     }
+    console.log(e);
+    
 
     let formData = new FormData();
     formData.append("ciudad", e.target.ciudad.value);
     formData.append("excursion", e.target.excursion.value);
     formData.append("provedor", e.target.provedor.value);
     formData.append("ppp", e.target.ppp.value);
+    formData.append("ppe", e.target.ppp.value);
     formData.append("pvp", e.target.pvp.value);
+    formData.append("pve", e.target.pvp.value);
     formData.append("fichas", JSON.stringify(res));
     await createTour(formData);
   };
+
   useEffect(() => {
     setFile((prev) => []);
     setIsCreating((prev) => false);
@@ -289,23 +298,23 @@ function RowTable({ permission }: Props) {
     document.body.removeChild(link);
     URL.revokeObjectURL(href);
   }
-
+function toCurrency(numberString:string) {
+    let number = parseFloat(numberString);
+    return number.toLocaleString('USD');
+}
   const columns = React.useMemo<ColumnDef<TourType, any>[]>(
-    () => [
-      {
-        header: "Tour",
-        footer: (props) => props.column.id,
-        columns: [
+    () => 
+       [
           {
             accessorFn: (row) => row.ciudad,
             id: "ciudad",
-            header: () => <span>ciudad</span>,
+            header: 'Ciudad',
             footer: (props) => props.column.id,
           },
           {
             accessorFn: (row) => row.excursion,
             id: "excursion",
-            header: "excursion",
+            header: "Excursion",
             footer: (props) => props.column.id,
             filterFn: "fuzzy",
             sortingFn: fuzzySort,
@@ -314,21 +323,36 @@ function RowTable({ permission }: Props) {
             accessorFn: (row) => row.provedor,
             id: "provedor",
             // cell: (info) => info.getValue(),
-            header: () => <span>provedor</span>,
+            header: 'Proveedor',
             footer: (props) => props.column.id,
           },
           {
             accessorFn: (row) => Number(row.ppp),
-            id: "ppp",
+            id: "Ppp",
             // cell: (info) => info.getValue(),
-            header: () => <span>ppp</span>,
+            header: 'ppp',
+            footer: (props) => props.column.id,
+          },
+          {
+            accessorFn: (row) => Number(row.ppe),
+            id: "Ppe",
+            cell: (info) => info.getValue(),
+            header:  'ppe',
             footer: (props) => props.column.id,
           },
           {
             accessorFn: (row) => Number(row.pvp),
-            id: "pvp",
+            id: "Pvp",
             // cell: (info) => info.getValue(),
-            header: () => <span>pvp</span>,
+            header: 'pvp',
+            footer: (props) => props.column.id,
+          },
+
+          {
+            accessorFn: (row) => Number(row.pve),
+            id: "Pve",
+            cell: (info) => info.getValue(),
+            header: 'pve',
             footer: (props) => props.column.id,
           },
           {
@@ -337,7 +361,6 @@ function RowTable({ permission }: Props) {
             cell: ({ getValue, row, column: { id }, table }) => {
               const tableMeta = table.options.meta;
               return tableMeta?.edits[row.index] ? (
-                <td className={"p-4 border-b border-blue-gray-50"}>
                   <Popover>
                     <PopoverHandler>
                       <DocumentIcon className="w-5" />
@@ -352,20 +375,19 @@ function RowTable({ permission }: Props) {
                       {file[0] && file[0].name}
                     </PopoverContent>
                   </Popover>
-                </td>
               ) : (
-                <td
+                <div
                   className=""
                   onClick={async () =>
                     await getFichaTecnica(row.original.fichasTecnicas[0])
                   }
                 >
                   <DocumentIcon className="w-5" />
-                </td>
+                </div>
               );
             },
 
-            header: () => <span>ficha1</span>,
+            header: ()=><span>ficha1</span>,
             footer: (props) => props.column.id,
           },
           {
@@ -374,7 +396,6 @@ function RowTable({ permission }: Props) {
             cell: ({ getValue, row, column: { id }, table }) => {
               const tableMeta = table.options.meta;
               return tableMeta?.edits[row.index] ? (
-                <td className={"p-4 border-b border-blue-gray-50"}>
                   <Popover>
                     <PopoverHandler>
                       <DocumentIcon className="w-5" />
@@ -389,16 +410,15 @@ function RowTable({ permission }: Props) {
                       {file[1] && file[1].name}
                     </PopoverContent>
                   </Popover>
-                </td>
               ) : (
-                <td
+                <div
                   className=""
                   onClick={async () =>
                     await getFichaTecnica(row.original.fichasTecnicas[1])
                   }
                 >
                   <DocumentIcon className="w-5" />
-                </td>
+                </div>
               );
             },
 
@@ -457,8 +477,7 @@ function RowTable({ permission }: Props) {
 
               const meta = table.options.meta;
               return (
-                <div className="edit-cell-container">
-                  {meta?.edits[row.index] ? (
+                  meta?.edits[row.index] ? (
                     <div className="edit-cell">
                       <button onClick={Cancel} name="cancel">
                         X
@@ -472,7 +491,7 @@ function RowTable({ permission }: Props) {
                       )}
                     </div>
                   ) : (
-                    <td>
+                    <div>
                       {permission ? (
                         <button onClick={Editable} name="edit">
                           ✐
@@ -480,9 +499,8 @@ function RowTable({ permission }: Props) {
                       ) : (
                         <div></div>
                       )}
-                    </td>
-                  )}
-                </div>
+                    </div>
+                  )
               );
             },
             header: () => <span>action</span>,
@@ -500,30 +518,26 @@ function RowTable({ permission }: Props) {
               };
 
               React.useEffect(() => {
-                console.log(data.length)
                   table.options.meta?.setUploadTimeDel((el) =>
                   el.map((ele, idx) => (idx == row.index ? false : ele)).concat([false])
                 );
               }, [data]);
 
               return (
-                permission && (
-                  <td>
-                    {table.options.meta?.uploadTimeDel[row.index] ? (
+                permission && 
+                    table.options.meta?.uploadTimeDel[row.index] ? (
                       <Loader />
                     ) : (
                       <TrashIcon className="w-5" onClick={Delete} />
-                    )}
-                  </td>
-                )
+                    )
+                
               );
             },
 
             header: () => <span></span>,
           },
         ],
-      },
-    ],
+      
     []
   );
 
@@ -581,9 +595,9 @@ function RowTable({ permission }: Props) {
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <th key={header.id} colSpan={header.colSpan}>
+                        <th key={header.id} colSpan={header.colSpan} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
                           {header.isPlaceholder ? null : (
-                            <>
+                            <HeaderTable header={header} table={table} >
                               <div
                                 {...{
                                   className: header.column.getCanSort()
@@ -603,15 +617,7 @@ function RowTable({ permission }: Props) {
                                 }[header.column.getIsSorted() as string] ??
                                   null}
                               </div>
-                              {header.column.getCanFilter() ? (
-                                <div>
-                                  <Filter
-                                    column={header.column}
-                                    table={table}
-                                  />
-                                </div>
-                              ) : null}
-                            </>
+                                                          </HeaderTable>
                           )}
                         </th>
                       );
@@ -670,7 +676,7 @@ function RowTable({ permission }: Props) {
                 </td>
                 <td className={"p-4 border-b border-blue-gray-50"}>
                   <Input
-                    type="text"
+                    type="number"
                     // value={ciudad}
                     defaultValue={""}
                     placeholder="ppp"
@@ -683,10 +689,26 @@ function RowTable({ permission }: Props) {
                     containerProps={{ className: "min-w-[100px]" }}
                   />
                 </td>
+                  <td className={"p-4 border-b border-blue-gray-50"}>
+                  <Input
+                    type="number"
+                    // value={ciudad}
+                    // disabled
+                    placeholder="ppe"
+                    name="ppe"
+                    className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                    labelProps={{
+                      className: "hidden",
+                    }}
+                    form="CreateForm"
+                    containerProps={{ className: "min-w-[100px]" }}
+                  />
+                </td>
+
 
                 <td className={"p-4 border-b border-blue-gray-50"}>
                   <Input
-                    type="text"
+                    type="number"
                     // value={ciudad}
                     defaultValue={""}
                     placeholder="pvp"
@@ -699,6 +721,22 @@ function RowTable({ permission }: Props) {
                     containerProps={{ className: "min-w-[100px]" }}
                   />
                 </td>
+                  <td className={"p-4 border-b border-blue-gray-50"}>
+                  <Input
+                    type="number"
+                    // value={ciudad}
+                    // disabled
+                    placeholder="pve"
+                    name="pve"
+                    className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                    labelProps={{
+                      className: "hidden",
+                    }}
+                    form="CreateForm"
+                    containerProps={{ className: "min-w-[100px]" }}
+                  />
+                </td>
+
                 <td className={"p-4 border-b border-blue-gray-50"}>
                   <Popover>
                     <PopoverHandler>
@@ -749,14 +787,14 @@ function RowTable({ permission }: Props) {
               </tr>
             )}
             {isLoading
-              ? "aoe"
+              ? <Loader/>
               : table.getRowModel().rows.map((row, index) => {
                   console.log(row);
                   return (
-                    <tr key={row.id}>
+                    <tr key={row.id} className="even:bg-blue-gray-50/50">
                       {row.getVisibleCells().map((cell) => {
                         return (
-                          <td key={cell.id}>
+                          <td key={cell.id} className="p-4">
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()
@@ -767,8 +805,75 @@ function RowTable({ permission }: Props) {
                     </tr>
                   );
                 })}
+
           </tbody>
         </table>
+        {data &&
+           <div className="mx-auto" >
+      <div className="flex items-center gap-2">
+        <button
+          className="border rounded p-1"
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}
+        >
+          {'<<'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          {'<'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>>'}
+        </button>
+        <span className="flex items-center gap-1">
+          <div>Pagina</div>
+          <strong>
+            {table.getState().pagination.pageIndex + 1} de {' '}
+            {table.getPageCount()}
+          </strong>
+        </span>
+        <span className="flex items-center gap-1">
+          | Ir a la Pagina:
+          <input
+            type="number"
+            defaultValue={table.getState().pagination.pageIndex + 1}
+            onChange={e => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0
+              table.setPageIndex(page)
+            }}
+            className="border p-1 rounded w-16"
+          />
+        </span>
+        <select
+          value={table.getState().pagination.pageSize}
+          onChange={e => {
+            table.setPageSize(Number(e.target.value))
+          }}
+        >
+          {[10, 20, 30, 40, 50].map(pageSize => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>{table.getPrePaginationRowModel().rows.length} Rows</div>
+            </div>
+    }
       </Card>
       <button onClick={() => setIsCreating((prev) => !prev)}> ++</button>
     </div>

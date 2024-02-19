@@ -8,15 +8,22 @@ import {
   TabsBody,
   Tab,
   TabPanel,
+  Typography,
 } from "@material-tailwind/react";
-
+import {UserIcon} from '@heroicons/react/24/outline'
 export const RenderInfo = () => {
   const { user } = AuthData() as AuthProviderType;
   return (
     <div>
-      GAAA
-      {user.name}
+      PDS VIAJES REGISTRO
+      <div>
+
+        <UserIcon className="w-6 inline-block"/>
+          {user.name}
+        <Typography variant="h2" color="red">
       {user.role}
+        </Typography>
+      </div>
     </div>
   );
 };
@@ -42,14 +49,16 @@ export const RenderMenu = () => {
 
   const MenuItem = ({ value, path, name }) => {
     return (
-      <Tab key={value} value={value} className="menuItem">
-        <Link to={path}>{name}</Link>
+      <Tab  key={value} value={value} className="px-0 h-16 text-2xl">
+       <Link  className="w-full" to={path}>
+       {name}
+       </Link>
       </Tab>
     );
   };
   return (
-    <div>
-      <div className="menu">
+    <>
+      
         {nav.map((r, i) => {
           if (user.isAuthenticated && r.isMenu) {
             return (
@@ -61,14 +70,15 @@ export const RenderMenu = () => {
             );
           } else return false;
         })}
-      </div>
-      {user.isAuthenticated ? (
-        <div className="flex">
-          <button onClick={logout}> logout</button>
-        </div>
-      ) : (
-        <div></div>
-      )}
+      </>
+  );
+};
+export const RenderLogout = () => {
+  const { user,logout } = AuthData() as AuthProviderType;
+  return (
+    <div>
+      <button onClick={()=>logout()}>Logout</button>
     </div>
   );
 };
+
