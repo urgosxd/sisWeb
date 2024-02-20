@@ -77,6 +77,105 @@ export async function deleteTour(id: number) {
   return await fetchData({ url: BASE_URL + `tour/${id}/`, options })
 }
 
+const BASE_URLHOTEL = BASE + "apiCrud/hoteles/"
+
+export async function createHotel(tour: any) {
+  console.log(
+    localStorage.getItem('authTokens')
+  );
+  const token = JSON.parse(localStorage.getItem('authTokens')!!).access
+  const options: RequestInit = {
+    method: "POST",
+    body: tour,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+    // headers: {
+    //     "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryYu134jq7TcPoELmF"
+    // }
+
+  }
+  return await fetchData({ url: BASE_URLHOTEL + "hotel/", options })
+}
+
+
+export async function updateHotel(id: number, tour: any) {
+  const token = JSON.parse(localStorage.getItem('authTokens')!!).access
+  const options: RequestInit = {
+    method: "PATCH",
+    body: JSON.stringify(tour),
+    headers: {
+      Accept: "application/json, text/plain",
+      "Content-Type": "application/json;charset=UTF-8",
+      Authorization: `Bearer ${token}`
+    }
+  }
+  return await fetchData({ url: BASE_URLHOTEL + `hotel/${id}/`, options })
+}
+
+export async function deleteHotel(id: number) {
+  const token = JSON.parse(localStorage.getItem('authTokens')!!).access
+  const options: RequestInit = {
+    method: "DELETE",
+    headers:{
+      Authorization: `Bearer ${token}`
+    }
+  }
+  return await fetchData({ url: BASE_URLRESTAURANTE + `hotel/${id}/`, options })
+}
+
+
+const BASE_URLRESTAURANTE = BASE + "apiCrud/restaurantes/"
+
+export async function createRest(tour: any) {
+  // console.log(tour)
+  // console.log(tokens)
+  console.log(
+    localStorage.getItem('authTokens')
+  );
+  const token = JSON.parse(localStorage.getItem('authTokens')!!).access
+  const options: RequestInit = {
+    method: "POST",
+    body: tour,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+    // headers: {
+    //     "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryYu134jq7TcPoELmF"
+    // }
+
+  }
+  return await fetchData({ url: BASE_URLRESTAURANTE + "tour/", options })
+}
+
+export async function updateRest(id: number, tour: any) {
+  const token = JSON.parse(localStorage.getItem('authTokens')!!).access
+  const options: RequestInit = {
+    method: "PATCH",
+    body: JSON.stringify(tour),
+    headers: {
+      Accept: "application/json, text/plain",
+      "Content-Type": "application/json;charset=UTF-8",
+      Authorization: `Bearer ${token}`
+    }
+  }
+  return await fetchData({ url: BASE_URLRESTAURANTE + `tour/${id}/`, options })
+}
+
+export async function deleteRest(id: number) {
+  const token = JSON.parse(localStorage.getItem('authTokens')!!).access
+  const options: RequestInit = {
+    method: "DELETE",
+    headers:{
+      Authorization: `Bearer ${token}`
+    }
+  }
+  return await fetchData({ url: BASE_URLRESTAURANTE + `tour/${id}/`, options })
+}
+
+
+
 export async function getFicha(id:number){
   return await fetchFile({url:BASE_FICHA_URL + `ficha/${id}/`})
 }
+
