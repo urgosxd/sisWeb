@@ -11,6 +11,7 @@ import {
   PopoverHandler,
   PopoverContent,
 } from "@material-tailwind/react";
+import NotificationToast from "../compo/notification";
 import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import Loader from "./spinner";
@@ -34,7 +35,7 @@ import {
   flexRender,
   RowData,
 } from "@tanstack/react-table";
-
+import 'react-toastify/dist/ReactToastify.css';
 import {
   RankingInfo,
   rankItem,
@@ -55,6 +56,8 @@ interface Props {
     delete: any
   }
 }
+
+import { ToastContainer, toast } from 'react-toastify';
 declare module "@tanstack/table-core" {
   interface FilterFns {
     fuzzy: FilterFn<unknown>;
@@ -63,6 +66,8 @@ declare module "@tanstack/table-core" {
     itemRank: RankingInfo;
   }
 }
+
+
 
 // type TourType = {
 //   id: number;
@@ -128,7 +133,7 @@ const defaultColumn: Partial<ColumnDef<any>> = {
         />
       </div>
     ) : (
-      <div className="!w-fit">{initialValue as string}</div>
+      <div className="!w-fit">{ typeof initialValue === "number" ? (initialValue as number).toFixed(2):initialValue }</div>
     );
   },
 };
@@ -146,6 +151,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
   //  const names = baseColumns.map(ele=>ele.name)
   //  const values = ["","",jk]
   // }
+  
+  const notify = (message:string) => toast(message);
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     url,
@@ -154,6 +161,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     // fetcher
   );
 
+
+  const [ErrFecth,setErrFetch] = useState(false)
   console.log(data || 0)
   const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
@@ -311,6 +320,13 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     setFile(nextFile);
   };
 
+  useEffect(()=>{
+
+      if(!ErrFecth){
+        return 
+    }
+      notify("Error")
+  },[ErrFecth])
   const myForm = useRef<HTMLFormElement | null>(null);
 
   function getDataFromFileName(path: string) {
@@ -346,6 +362,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
 
     const result = await Promise.all(file!.map(async (ele) => getBase64(ele!)));
 
+
     // const  [Filename,Extension] =  getDataFromFileName(file!.name)
     const res: any[] = [];
     for (let idx = 0; idx < result.length; idx++) {
@@ -368,7 +385,13 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     });
 
     formData.append("fichas", JSON.stringify(res));
+    try {
+        
     await methods.create(formData);
+    } catch (error) {
+      
+      setErrFetch(prev=>true)
+    }
   };
 
   useEffect(() => {
@@ -378,7 +401,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     setUploadTime((prev) => Array.from(data || [], (_) => false))
     setUploadTimeDel((prev) => Array.from(data || [], (_) => false))
     setEdites((prev) => Array.from(data || [], (_) => false));
-  }, [data]);
+    setErrFetch(prev=>false)
+  }, [data,ErrFecth]);
 
   async function getFichaTecnica(id: number) {
     const data = await getFicha(id);
@@ -449,9 +473,14 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
           }
           formObj!["fichas"] = JSON.stringify(res);
         }
+              try {
+                await methods.update(row.original.id, formObj);
 
-        const ga = await methods.update(row.original.id, formObj);
-        return;
+              } catch (error) {
+          setErrFetch(prev=>true)
+                
+              }
+              return;
       };
 
 
@@ -493,8 +522,14 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         table.options.meta?.setUploadTimeDel((el) =>
           el.map((ele, idx) => (idx == row.index ? true : ele))
         );
-
+          
+          try {
+            
         await methods.delete(row.original.id);
+          } catch (error) {
+            setErrFetch(prev=>true)
+            
+          }
       };
 
       React.useEffect(() => {
@@ -519,12 +554,29 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
 
   const currenci: { [key: string]: string } = { "sol": "PEN", "dolar": "USD" }
 
+
+
   const gaa = baseColumns.map(ele => {
     if (special.includes(ele.name)) {
       return compSpecial[ele.name]
     } else {
+      let ga = null
+      switch (ele.extra) {
+        case "none":
+          ga = (row)=> row[ele.name]
+          break;
+        case "time":
+          ga = (row)=> row[ele.name]
+        break
+        case "large":
+        ga = (row)=> row[ele.name]
+        break
+        default:
+          ga = (row)=>Number(row[ele.name])
+          break;
+      }
       return ({
-        accessorFn: ele.extra == "none" ? (row) => row[ele.name] : (row) => Number(row[ele.name]),
+        accessorFn: ga,
         // accessorFn: (row)=>console.log([`${ele.name}`]),
         id: ele.name,
         header: `${ele.name[0].toUpperCase() + ele.name.slice(1)} ${ele.extra == "none" ? "" : currenci[ele.extra]} `,
@@ -923,6 +975,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         }
       </Card>
       <button onClick={() => setIsCreating((prev) => !prev)}> ++</button>
+
+      <ToastContainer/>
     </div>
   );
 }

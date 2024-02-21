@@ -14,6 +14,7 @@ import {
   TabPanel,
 } from "@material-tailwind/react";
 import { NavigationDash } from "../components/structure/drawer";
+import NotificationToast from "../components/compo/notification";
 
 const BASEURL = "http://127.0.0.1:8000/";
 
@@ -136,6 +137,7 @@ export const AuthWrapper = () => {
         {/*     <RenderRoutes /> */}
         {/*   </TabsBody> */}
         {/* </Tabs> */}
+
         {
           user.isAuthenticated ?
         <NavigationDash>

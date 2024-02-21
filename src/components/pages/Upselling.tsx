@@ -1,3 +1,4 @@
+
 import { Card, Input, Textarea, Typography } from "@material-tailwind/react";
 import RowTable from "../compo/rowTable";
 import NotificationToast from "../compo/notification";
@@ -5,9 +6,9 @@ import { AuthData } from "../../provider/authProvider";
 import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { RenderInfo } from "../structure/RenderNavigation";
-import { createHotel, createRest, deleteHotel, deleteRest, updateHotel, updateRest } from "../lib/api";
+import { createBoleto, createHotel, createRest, createTraslado, createTren, createUps, deleteBoleto, deleteHotel, deleteRest, deleteTraslado, deleteTren, deleteUps, updateBoleto, updateHotel, updateRest, updateTraslado, updateTren, updateUps } from "../lib/api";
 
-export const Restaurante = () => {
+export const Upselling = () => {
   // const notification = useSWR(
   //   // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
   //   "http://127.0.0.1:8000/apiCrud/notification/notification/",
@@ -23,30 +24,23 @@ export const Restaurante = () => {
     ga("/login")
   }
 
-  const baseColumns = [
-    {name:"ciudad",extra:"none",type: "text"},
-    {name:"nombre",extra:"none",type: "text"},
-    {name:"especialidad",extra:"none",type: "text"},
-    {name:"tipoDeServicio",extra:"none",type: "text"},
-    {name:"horarioDeAtencion",extra:"time",type: "text"},
-    {name:"direccion",extra:"none",type:"text"},
-    {name:"telefonoReserva",extra:"tel",type:"text"},
-    {name:"telefonoRecepcion",extra:"tel",type:"text"},
-    {name:"precioMenu",extra:"sol",type:"number"},
-    {name:"precioMenuE",extra:"dolar",type:"number"},
-    {name:"figma",extra:"none",type:"text"},
-    {name:"pdf",extra:"none",type:"file"},
-  ]
 
+        // fields = ['id','ciudad','servicio','pppAdulto','ppeAdulto','pppNinio','ppeNinio','pppInfante','ppeInfante','estudinateP','estudianteE']
+  const baseColumns = [
+    {name:"servicioProducto",extra:"none",type: "text"},
+    {name:"detalle",extra:"large",type: "text"},
+    {name:"ppp",extra:"sol",type:"number"},
+    {name:"ppe",extra:"dolar",type:"number"},
+  ]
 
   return (
     <div>
       <Typography>
-        RESTAURANTE
+        UPSELLING
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/restaurantes/restaurante/"} methods={{ create: createRest, update: updateRest, delete: deleteRest }} />
+      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/upsellings/upselling/"} methods={{ create: createUps, update: updateUps, delete: deleteUps }} />
     </div>
   );
 }

@@ -22,7 +22,13 @@ const NamesNavbar2URL:{[key:string]:string} = {
   "Cambio":"/cambio",
   "Tours":"/tour",
   "Hoteles":"/hotel",
-  "About": "/about",
+  "Restaurantes": "/restaurante",
+  "Boletos": "/boleto",
+  "Traslados": "/traslado",
+  "Trenes": "/tren",
+  "Transportes": "/transporte",
+  "Upsellings": "/upselling",
+  "Guiados": "/guiado",
   "Account": "/account",
 }
 
@@ -44,7 +50,7 @@ export function NavigationDash({children}:{children:React.ReactNode}) {
   const currentSlug = (currentPage.split("/").slice(-1))
   console.log(currentPage)
   // console.log(currentSlug)
-  const navNameICon = [{logo:<PlayCircleIcon className="w-5"/>,name:"Tours"},{logo:<ArrowDownTrayIcon className="w-5"/>,name:"Hoteles"},{logo:<ArrowDownTrayIcon className="w-5"/>,name:"About"},{logo:<CalendarIcon className="w-5"/>,name:"Account"}]
+  const navNameICon = [{logo:<PlayCircleIcon className="w-5"/>,name:"Tours"},{logo:<ArrowDownTrayIcon className="w-5"/>,name:"Hoteles"},{logo:<ArrowDownTrayIcon className="w-5"/>,name:"Restaurantes"},{logo:<CalendarIcon className="w-5"/>,name:"Boletos"},{logo:<CalendarIcon className="w-5"/>,name:"Traslados"},{logo:<CalendarIcon className="w-5"/>,name:"Trenes"},{logo:<CalendarIcon className="w-5"/>,name:"Transportes"},{logo:<CalendarIcon className="w-5"/>,name:"Upsellings"},{logo:<CalendarIcon className="w-5"/>,name:"Guiados"}]
   const navNames = navNameICon.map(ele=>ele.name)
   const [idxNav, setIdxNav] = useState<number>(navNames.indexOf(currentSlug[0])+1)
   

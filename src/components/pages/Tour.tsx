@@ -41,7 +41,7 @@ export const Tour = () => {
       <Typography>
         TOURS
       </Typography>
-      <NotificationToast />
+      <NotificationToast/>
       <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/tours/tour/"} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
     </div>
   );

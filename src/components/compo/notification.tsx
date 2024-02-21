@@ -1,7 +1,8 @@
 import useSWR from "swr";
 import { ToastContainer, toast } from 'react-toastify';
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import 'react-toastify/dist/ReactToastify.css';
+import { Typography } from "@material-tailwind/react";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -12,13 +13,32 @@ function NotificationToast() {
     fetcher,{ refreshInterval: 10 }
     // fetcher
   );
+  const prevData = useRef(undefined)
 
+  const comp = <div className="flex flex-col"><Typography variant="h4">Ultima Accion</Typography> <Typography>{data && data.message}</Typography></div>
   useEffect(()=>{
-      if(!data) return
-      notify()
+    //   prevData.current = data
+    // console.log("GIII");
+    // console.log(prevData.current);
+    //   if(!data){
+    //   return
+    // }else{
+    //   if(prevData.current == null){
+    //     console.log("GAA")
+    //     return
+    //   }else{
+    //     console.log("GEE")
+    //   notify()
+    //   }
+    // }
+    if(!data){
+      return
+    }
+    notify()
+
   },[data])
 
-  const notify = () => toast(data.message);
+  const notify = () => toast(comp);
   return(
     <ToastContainer />
  ) 
