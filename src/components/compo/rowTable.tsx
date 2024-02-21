@@ -133,7 +133,7 @@ const defaultColumn: Partial<ColumnDef<any>> = {
         />
       </div>
     ) : (
-      <div className="!w-fit">{ typeof initialValue === "number" ? (initialValue as number).toFixed(2):initialValue }</div>
+      <div className="!w-fit">{ typeof initialValue === "number" ?  (initialValue as number).toFixed(2):initialValue }</div>
     );
   },
 };
@@ -561,18 +561,27 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
       return compSpecial[ele.name]
     } else {
       let ga = null
+      let type = ""
       switch (ele.extra) {
         case "none":
           ga = (row)=> row[ele.name]
+          type = "string"
           break;
         case "time":
           ga = (row)=> row[ele.name]
+          type  = "string"
         break
         case "large":
         ga = (row)=> row[ele.name]
+          type= "string"
         break
+        case "tel":
+        ga = (row)=> row[ele.name]
+        type = "string"
+          break
         default:
           ga = (row)=>Number(row[ele.name])
+          type = "number"
           break;
       }
       return ({
@@ -580,6 +589,9 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         // accessorFn: (row)=>console.log([`${ele.name}`]),
         id: ele.name,
         header: `${ele.name[0].toUpperCase() + ele.name.slice(1)} ${ele.extra == "none" ? "" : currenci[ele.extra]} `,
+        meta:{
+          type:type 
+        },
         footer: (props) => props.column.id
       })
     }
