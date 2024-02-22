@@ -1,6 +1,6 @@
 const ERROR_MSG = "Oops! Something went wrong";
 
-const BASE = `${import.meta.env.VITE_URL_BACK}`
+const BASE = `${import.meta.env.VITE_URL_BACK}/`
 
 export interface FetchData {
   url: string;
