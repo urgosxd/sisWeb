@@ -1,6 +1,5 @@
 import { Card, Input, Textarea, Typography } from "@material-tailwind/react";
-import RowTable from "../compo/rowTable";
-import NotificationToast from "../compo/notification";
+import RowTable from "../compo/rowTable"; import NotificationToast from "../compo/notification";
 import { AuthData } from "../../provider/authProvider";
 import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +45,7 @@ export const Boleto = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/boletos/boleto/"} methods={{ create: createBoleto, update: updateBoleto, delete: deleteBoleto }} />
+      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/boletos/boleto/`} methods={{ create: createBoleto, update: updateBoleto, delete: deleteBoleto }} />
     </div>
   );
 }
