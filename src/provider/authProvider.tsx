@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
+    InitialRoute,
     RenderInfo,
   RenderMenu,
   RenderRoutes,
@@ -16,7 +17,7 @@ import {
 import { NavigationDash } from "../components/structure/drawer";
 import NotificationToast from "../components/compo/notification";
 
-const BASEURL = "http://127.0.0.1:8000/";
+const BASEURL = `${import.meta.env.VITE_URL_BACK}/`
 
 const AuthContext = createContext<null | AuthProviderType>(null);
 export const AuthData = () => useContext(AuthContext);
@@ -143,7 +144,7 @@ export const AuthWrapper = () => {
         <NavigationDash>
           <RenderRoutes/>
         </NavigationDash>
-        : <RenderRoutes/>
+        : <InitialRoute/>
           
       }
       </>

@@ -11,6 +11,9 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import {UserIcon} from '@heroicons/react/24/outline'
+import Home from "../pages/Initial";
+import { Login } from "../pages/Login"
+
 export const RenderInfo = () => {
   const { user } = AuthData() as AuthProviderType;
   return (
@@ -27,6 +30,17 @@ export const RenderInfo = () => {
     </div>
   );
 };
+
+export const InitialRoute =() =>{
+
+  return(
+  <Routes>
+    <Route key="ini" path="/" element={<Home/>}/>
+    <Route key="log" path="/login" element={<Login/>}/>
+  </Routes>
+  )
+
+}
 
 export const RenderRoutes = () => {
   const { user } = AuthData() as AuthProviderType;
