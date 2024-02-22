@@ -36,13 +36,14 @@ export const Tour = () => {
   ]
 
 
+  console.log(import.meta.env.VITE_URL_BACK)
   return (
     <div>
       <Typography>
         TOURS
       </Typography>
       <NotificationToast/>
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/tours/tour/"} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
+      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 const ERROR_MSG = "Oops! Something went wrong";
 
-const BASE = "http://127.0.0.1:8000/"
+const BASE = `${import.meta.env.VITE_URL_BACK}`
 
 export interface FetchData {
   url: string;

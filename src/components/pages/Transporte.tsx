@@ -40,7 +40,7 @@ export const Transporte = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/transportes/transporte/"} methods={{ create: createTransporte, update: updateTransporte, delete: deleteTransporte }} />
+      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/transportes/transporte/`} methods={{ create: createTransporte, update: updateTransporte, delete: deleteTransporte }} />
     </div>
   );
 }

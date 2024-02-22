@@ -50,7 +50,7 @@ export const Hotel = () => {
         HOTELES
         </Typography>
       <NotificationToast/>
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false:true} url={"http://127.0.0.1:8000/apiCrud/hoteles/hotel/"} methods={{create:createHotel,update:updateHotel,delete:deleteHotel}} />
+      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false:true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/hoteles/hotel/`} methods={{create:createHotel,update:updateHotel,delete:deleteHotel}} />
     </div>
   );
 }

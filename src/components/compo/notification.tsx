@@ -9,7 +9,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 function NotificationToast() {
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
-    "http://127.0.0.1:8000/apiCrud/notification/notification/",
+    `${import.meta.env.VITE_URL_BACK}/apiCrud/notification/notification/`,
     fetcher,{ refreshInterval: 10 }
     // fetcher
   );

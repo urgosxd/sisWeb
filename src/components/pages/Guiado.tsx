@@ -43,7 +43,7 @@ export const Guiado = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={"http://127.0.0.1:8000/apiCrud/guiados/guiado/"} methods={{ create: createGuiado, update: updateGuiado, delete: deleteGuiado }} />
+      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/guiados/guiado/`} methods={{ create: createGuiado, update: updateGuiado, delete: deleteGuiado }} />
     </div>
   );
 }
