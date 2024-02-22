@@ -24,15 +24,15 @@ export const Tour = () => {
 
 
   const baseColumns = [
-    {name:"ciudad",extra:"none"},
-    {name:"excursion",extra:"none"},
-    {name:"provedor",extra:"none"},
-    {name:"ppp",extra:"sol"},
-    {name:"ppe",extra:"dolar"},
-    {name:"pvp",extra:"sol"},
-    {name:"pve",extra:"dolar"},
-    {name:"figma",extra:"none"},
-    {name:"pdf",extra:"none"},
+    {name:"ciudad",extra:"none",type:"text"},
+    {name:"excursion",extra:"none",type:"text"},
+    {name:"provedor",extra:"none",type:"text"},
+    {name:"ppp",extra:"sol",type:"number"},
+    {name:"ppe",extra:"dolar",type:"number"},
+    {name:"pvp",extra:"sol",type:"number"},
+    {name:"pve",extra:"dolar",type:"number"},
+    {name:"figma",extra:"none",type:"text"},
+    {name:"pdf",extra:"none",type:"file"},
   ]
 
 
