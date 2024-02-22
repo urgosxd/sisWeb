@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { DocumentIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { DocumentIcon, TrashIcon,PlusIcon } from "@heroicons/react/24/outline";
 import { createTour, deleteTour, getFicha, updateTour } from "../lib/api";
 import {
   Button,
@@ -10,6 +10,7 @@ import {
   Popover,
   PopoverHandler,
   PopoverContent,
+  IconButton,
 } from "@material-tailwind/react";
 import NotificationToast from "../compo/notification";
 import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
@@ -737,6 +738,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                 return !special.includes(ele.name as string) &&
                   <td><Input
                     type={ele.type}
+                    step="any"
                     defaultValue={""}
                     placeholder={ele.name as string}
                     name={ele.name as string}
@@ -986,7 +988,9 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
           </div>
         }
       </Card>
-      <button onClick={() => setIsCreating((prev) => !prev)}> ++</button>
+      <button  className="fixed bottom-8 right-5 rounded-full w-28 flex justify-center items-center  h-28 border border-blue-gray-400" onClick={() => setIsCreating((prev) => !prev)}>
+        <PlusIcon color="red" className="w-20"/>
+      </button>
 
       <ToastContainer/>
     </div>
