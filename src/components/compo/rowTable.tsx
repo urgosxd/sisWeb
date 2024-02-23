@@ -265,31 +265,38 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     {
       accessorkey: `pdf`,
       id: "pdf",
-      cell: ({ getValue, row, column: { id }, table }) => {
-        const tableMeta = table.options.meta;
+      cell: ({ getValue, row, column, table }) => {
+        let initialValue = getValue() as string;
+           const tableMeta = table.options.meta;
+        const [value, setValue] = React.useState(initialValue);
+        React.useEffect(() => {
+          setValue(initialValue);
+        }, [initialValue]);
+        const onBlur = () => {
+          const idx = column.id;
+          tableMeta!.tempEditData[idx] = value;
+        };
+
+
         return tableMeta?.edits[row.index] ? (
-          <Popover>
-            <PopoverHandler>
-              <DocumentIcon className="w-5" />
-            </PopoverHandler>
-            <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
-              <FileUploader
-                handleChange={(ele: File) => handleChangeCreate(0, ele)}
-                name="file"
-                types={fileTypes}
-                label="Sube o arrastra un archivo justo aqui"
-              />
-              {file[0] && file[0].name}
-            </PopoverContent>
-          </Popover>
+          <div className="w-36">
+
+            <Input
+              // type={typeof initialValue === 'number' ? "number" : "text"}
+              type="text"
+              value={value as string}
+              onChange={(e) => setValue(e.target.value)}
+              onBlur={onBlur}
+              containerProps={{
+                className: "!min-w-0",
+              }}
+            />
+          </div>
         ) : (
           <div
-            className=""
-            onClick={async () =>
-              await getFichaTecnica(row.original.fichasTecnicas[0])
-            }
+            className="w-36"
           >
-            <DocumentIcon className="w-5" />
+            <a href={initialValue as string} target="_blank"> Link Drive</a>
           </div>
         );
       },
@@ -634,7 +641,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    debugTable: true,
+    // debugTable: true,
     // debugHeaders: true,
     // debugColumns: false,
   });
