@@ -264,7 +264,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     "pdf":
     {
       accessorkey: `pdf`,
-      id: "pdf",
+      id: "drive",
       cell: ({ getValue, row, column, table }) => {
         let initialValue = getValue() as string;
            const tableMeta = table.options.meta;
@@ -386,7 +386,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     let formData = new FormData();
     baseColumns.forEach(element => {
       if (element.name == "pdf") {
-        formData.append("fichas", JSON.stringify(res));
+        // formData.append("fichas", JSON.stringify(res));
       } else {
         formData.append(element.name, e.target[element.name].value);
       }
@@ -726,7 +726,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                       type="text"
                       defaultValue={""}
                       placeholder={ele.name as string}
-                      name={ele.name as string}
+                      name={"drive"}
                       className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                       labelProps={{
                         className: "hidden",
