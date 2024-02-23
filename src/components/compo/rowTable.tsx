@@ -404,7 +404,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
       }
 
     } catch (error) {
-
+      setCreateUpload((prev) => false);
       setErrFetch(prev => true)
     }
   };
@@ -519,7 +519,7 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
           setEdites((prev) => Array.from(data || [], (_) => false));
         } catch (error) {
           setErrFetch(prev => true)
-
+          setEdites((prev) => Array.from(data || [], (_) => false));
         }
         return;
       };
