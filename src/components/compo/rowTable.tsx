@@ -722,22 +722,19 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                 }
                 else if (ele.name == "pdf") {
                   return (
-                    <td className={"p-4 border-b border-blue-gray-50"}>
-                      <Popover>
-                        <PopoverHandler>
-                          <DocumentIcon className="w-5" />
-                        </PopoverHandler>
-                        <PopoverContent className="z-[999] grid w-[28rem] grid-cols-2 overflow-hidden p-0">
-                          <FileUploader
-                            handleChange={(ele: File) => handleChangeCreate(0, ele)}
-                            name="file"
-                            types={fileTypes}
-                            label="Sube o arrastra un archivo justo aqui"
-                          />
-                          {file[0] && file[0].name}
-                        </PopoverContent>
-                      </Popover>
-                    </td>
+                    <td><Input
+                      type="text"
+                      defaultValue={""}
+                      placeholder={ele.name as string}
+                      name={ele.name as string}
+                      className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                      labelProps={{
+                        className: "hidden",
+                      }}
+                      form="CreateForm"
+                      containerProps={{ className: "min-w-36 !w-36" }}
+
+                    /></td>
                   )
                 }
 
