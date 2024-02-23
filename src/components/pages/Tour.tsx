@@ -37,6 +37,7 @@ export const Tour = () => {
 
 
   console.log(import.meta.env.VITE_URL_BACK)
+
   return (
     <div>
       <Typography>

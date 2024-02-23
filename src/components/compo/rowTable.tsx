@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { DocumentIcon, TrashIcon,PlusIcon } from "@heroicons/react/24/outline";
+import { DocumentIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { createTour, deleteTour, getFicha, updateTour } from "../lib/api";
 import {
   Button,
@@ -134,7 +134,7 @@ const defaultColumn: Partial<ColumnDef<any>> = {
         />
       </div>
     ) : (
-      <div className="!w-fit">{ typeof initialValue === "number" ?  (initialValue as number).toFixed(2):initialValue }</div>
+      <div className="!w-fit">{typeof initialValue === "number" ? (initialValue as number).toFixed(2) : initialValue}</div>
     );
   },
 };
@@ -152,8 +152,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
   //  const names = baseColumns.map(ele=>ele.name)
   //  const values = ["","",jk]
   // }
-  
-  const notify = (message:string) => toast(message);
+
+  const notify = (message: string) => toast(message);
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     url,
@@ -163,7 +163,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
   );
 
 
-  const [ErrFecth,setErrFetch] = useState(false)
+  const [ErrFecth, setErrFetch] = useState(false)
   console.log(data || 0)
   const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
@@ -267,7 +267,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
       id: "drive",
       cell: ({ getValue, row, column, table }) => {
         let initialValue = getValue() as string;
-           const tableMeta = table.options.meta;
+        const tableMeta = table.options.meta;
         const [value, setValue] = React.useState(initialValue);
         React.useEffect(() => {
           setValue(initialValue);
@@ -328,13 +328,13 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     setFile(nextFile);
   };
 
-  useEffect(()=>{
+  useEffect(() => {
 
-      if(!ErrFecth){
-        return 
+    if (!ErrFecth) {
+      return
     }
-      notify("Error")
-  },[ErrFecth])
+    notify("Error")
+  }, [ErrFecth])
   const myForm = useRef<HTMLFormElement | null>(null);
 
   function getDataFromFileName(path: string) {
@@ -396,23 +396,44 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     // console.log(e.target["drive"].value)
     formData.append("fichas", JSON.stringify(res));
     try {
-        
-    await methods.create(formData);
+
+      const respuesta = await methods.create(formData);
+      if (respuesta) {
+        setIsCreating(prev => false)
+        setCreateUpload((prev) => false);
+      }
+
     } catch (error) {
-      
-      setErrFetch(prev=>true)
+
+      setErrFetch(prev => true)
     }
   };
+function replaceArray(originalArray:boolean[], newArray:boolean[]) {
+    // Calculate the difference in length between the original and new array
+    const lengthDifference = originalArray.length - newArray.length;
+
+    // If the original array is longer than the new array, remove elements from the original array
+    if (lengthDifference > 0) {
+        originalArray.splice(newArray.length, lengthDifference);
+    }
+    // If the new array is longer than the original array, append undefined elements to the original array
+    else if (lengthDifference < 0) {
+        originalArray.splice(originalArray.length, 0, ...Array(Math.abs(lengthDifference)).fill(undefined));
+    }
+
+    // Replace the contents of the original array with the contents of the new array
+    originalArray.splice(0, newArray.length, ...newArray);
+    return originalArray
+}
 
   useEffect(() => {
     setFile((prev) => []);
-    setIsCreating((prev) => false);
-    setCreateUpload((prev) => false);
-    setUploadTime((prev) => Array.from(data || [], (_) => false))
-    setUploadTimeDel((prev) => Array.from(data || [], (_) => false))
-    setEdites((prev) => Array.from(data || [], (_) => false));
-    setErrFetch(prev=>false)
-  }, [data,ErrFecth]);
+    // setIsCreating((prev) => false);
+    // setUploadTime((prev) => Array.from(data || [], (_) => false))
+    // setEdites((prev) => Array.from(data || [], (_) => false))
+    setEdites((prev)=>  replaceArray(Array.from(data || [], (_) => false),prev))
+    setErrFetch(prev => false)
+  }, [data, ErrFecth]);
 
   async function getFichaTecnica(id: number) {
     const data = await getFicha(id);
@@ -446,7 +467,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
 
       const Editable = () => {
         table.options.meta?.setEdites((el) =>
-          el.map((ele, idx) => (idx == row.index ? !ele : false))
+          el.map((ele, idx) => (idx == row.index ? true : false))
         );
       };
 
@@ -460,6 +481,15 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         table.options.meta?.setUploadTime((el) =>
           el.map((ele, idx) => (idx == row.index ? true : false))
         );
+
+        // table.options.meta?.setEdites((el) =>
+        //   el.map((ele, idx) => (idx == row.index ? true : false))
+// )
+    //     useEffect(()=>{
+    // table.options.meta?.setEdites((el) =>
+    //       el.map((ele, idx) => (idx == row.index ? true : false))
+    //       )
+    //     },[])
         const formObj = table.options.meta?.tempEditData;
         if (file!.length > 0) {
           const result = await Promise.all(
@@ -483,14 +513,15 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
           }
           formObj!["fichas"] = JSON.stringify(res);
         }
-              try {
-                await methods.update(row.original.id, formObj);
+        try {
+          const respuesta = await methods.update(row.original.id, formObj);
+          setUploadTime((prev) => Array.from(data || [], (_) => false))
+          setEdites((prev) => Array.from(data || [], (_) => false));
+        } catch (error) {
+          setErrFetch(prev => true)
 
-              } catch (error) {
-          setErrFetch(prev=>true)
-                
-              }
-              return;
+        }
+        return;
       };
 
 
@@ -532,14 +563,15 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         table.options.meta?.setUploadTimeDel((el) =>
           el.map((ele, idx) => (idx == row.index ? true : ele))
         );
-          
-          try {
-            
-        await methods.delete(row.original.id);
-          } catch (error) {
-            setErrFetch(prev=>true)
-            
-          }
+
+        try {
+
+          const respuesta = await methods.delete(row.original.id);
+          setUploadTimeDel((prev) => Array.from(data || [], (_) => false))
+        } catch (error) {
+          setErrFetch(prev => true)
+
+        }
       };
 
       React.useEffect(() => {
@@ -574,23 +606,23 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
       let type = ""
       switch (ele.extra) {
         case "none":
-          ga = (row)=> row[ele.name]
+          ga = (row) => row[ele.name]
           type = "string"
           break;
         case "time":
-          ga = (row)=> row[ele.name]
-          type  = "string"
-        break
+          ga = (row) => row[ele.name]
+          type = "string"
+          break
         case "large":
-        ga = (row)=> row[ele.name]
-          type= "string"
-        break
+          ga = (row) => row[ele.name]
+          type = "string"
+          break
         case "tel":
-        ga = (row)=> row[ele.name]
-        type = "string"
+          ga = (row) => row[ele.name]
+          type = "string"
           break
         default:
-          ga = (row)=>Number(row[ele.name])
+          ga = (row) => Number(row[ele.name])
           type = "number"
           break;
       }
@@ -599,8 +631,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         // accessorFn: (row)=>console.log([`${ele.name}`]),
         id: ele.name,
         header: `${ele.name[0].toUpperCase() + ele.name.slice(1)} ${ele.extra == "none" ? "" : currenci[ele.extra]} `,
-        meta:{
-          type:type 
+        meta: {
+          type: type
         },
         footer: (props) => props.column.id
       })
@@ -718,9 +750,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                       }}
                       form="CreateForm"
                       containerProps={{ className: "min-w-36 !w-36" }}
-
                     /></td>)
-
                 }
                 else if (ele.name == "pdf") {
                   return (
@@ -739,8 +769,6 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                     /></td>
                   )
                 }
-
-
                 return !special.includes(ele.name as string) &&
                   <td><Input
                     type={ele.type}
@@ -754,12 +782,9 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                     }}
                     form="CreateForm"
                     containerProps={{ className: "min-w-36 !w-36" }}
-
                   /></td>
-
-               
-              }) }
-             {permission && isCreating &&
+              })}
+              {permission && isCreating &&
                 <td className={"p-4 border-b border-blue-gray-50"}>
                   {createUpload ? (
                     <Loader />
@@ -994,11 +1019,11 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
           </div>
         }
       </Card>
-      <button  className="fixed bottom-8 right-5 rounded-full w-28 flex justify-center items-center  h-28 border border-blue-gray-400" onClick={() => setIsCreating((prev) => !prev)}>
-        <PlusIcon color="red" className="w-20"/>
+      <button className="fixed bottom-8 right-5 rounded-full w-28 flex justify-center items-center  h-28 border border-blue-gray-400" onClick={() => setIsCreating((prev) => !prev)}>
+        <PlusIcon color="red" className="w-20" />
       </button>
 
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 }
