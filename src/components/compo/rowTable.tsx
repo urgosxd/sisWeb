@@ -387,11 +387,13 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     baseColumns.forEach(element => {
       if (element.name == "pdf") {
         // formData.append("fichas", JSON.stringify(res));
+        formData.append("drive", e.target["drive"].value);
       } else {
         formData.append(element.name, e.target[element.name].value);
       }
     });
 
+    // console.log(e.target["drive"].value)
     formData.append("fichas", JSON.stringify(res));
     try {
         
@@ -726,7 +728,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
                       type="text"
                       defaultValue={""}
                       placeholder={ele.name as string}
-                      name={"drive"}
+                      name="drive"
                       className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                       labelProps={{
                         className: "hidden",
