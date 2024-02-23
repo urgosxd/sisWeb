@@ -432,6 +432,8 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
     // setUploadTime((prev) => Array.from(data || [], (_) => false))
     // setEdites((prev) => Array.from(data || [], (_) => false))
     setEdites((prev)=>  replaceArray(Array.from(data || [], (_) => false),prev))
+    setUploadTimeDel((prev)=>replaceArray(Array.from(data || [], (_) => false),prev))
+
     setErrFetch(prev => false)
   }, [data, ErrFecth]);
 
@@ -566,19 +568,21 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
 
         try {
 
-          const respuesta = await methods.delete(row.original.id);
-          setUploadTimeDel((prev) => Array.from(data || [], (_) => false))
+          await methods.delete(row.original.id);
+          setUploadTimeDel((ele) => ele.map((ele, idx) => (idx == row.index ? false : ele)))
         } catch (error) {
+          console.log(error)
           setErrFetch(prev => true)
-
+          setUploadTimeDel((ele) => ele.map((ele, idx) => (idx == row.index ? false : ele)))
         }
       };
 
-      React.useEffect(() => {
-        table.options.meta?.setUploadTimeDel((el) =>
-          el.map((ele, idx) => (idx == row.index ? false : ele)).concat([false])
-        );
-      }, [data]);
+      // React.useEffect(() => {
+      //   table.options.meta?.setUploadTimeDel((el) =>
+      //     el.map((ele, idx) => (idx == row.index ? false : ele)).concat([false])
+      //   );
+      //   setUploadTimeDel((prev)=>replaceArray(Array.from(data || [], (_) => false),prev))
+      // }, [data]);
 
       return (
         permission &&
