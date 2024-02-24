@@ -121,7 +121,7 @@ export async function deleteHotel(id: number) {
       Authorization: `Bearer ${token}`
     }
   }
-  return await fetchData({ url: BASE_URLRESTAURANTE + `hotel/${id}/`, options })
+  return await fetchData({ url: BASE_URLHOTEL + `hotel/${id}/`, options })
 }
 
 
@@ -269,7 +269,7 @@ export async function deleteTraslado(id: number) {
       Authorization: `Bearer ${token}`
     }
   }
-  return await fetchData({ url: BASE_URLBOLETO + `traslado/${id}/`, options })
+  return await fetchData({ url: BASE_URLTRASLADO + `traslado/${id}/`, options })
 }
 
 
