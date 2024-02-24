@@ -410,6 +410,10 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
   };
 function replaceArray(originalArray:boolean[], newArray:boolean[]) {
     // Calculate the difference in length between the original and new array
+    //
+    if (newArray.length == 0){
+      return originalArray
+    }
     const lengthDifference = originalArray.length - newArray.length;
 
     // If the original array is longer than the new array, remove elements from the original array
@@ -433,7 +437,6 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
     // setEdites((prev) => Array.from(data || [], (_) => false))
     setEdites((prev)=>  replaceArray(Array.from(data || [], (_) => false),prev))
     setUploadTimeDel((prev)=>replaceArray(Array.from(data || [], (_) => false),prev))
-
     setErrFetch(prev => false)
   }, [data, ErrFecth]);
 
