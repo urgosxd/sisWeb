@@ -102,6 +102,25 @@ declare module "@tanstack/react-table" {
 // const aoeu =() => {
 //       tableMeta?.setEdites((el) => el.map((ele, idx) => (idx == row.index ? !ele : false)))
 //     }
+const traducciones:{[key:string]:string} = {
+  ninio: 'Niño',
+  anio: 'Año',
+  excursion: 'Excursión',
+  provedor: 'Proveedor',
+  categoria: 'Categoría',
+  telefono: 'Teléfono',
+  recepcion: 'Recepción',
+  atencion: 'Atención',
+  direccion: 'Dirección',
+  menu: 'Menú',
+  vehiculo: 'Vehículo',
+
+    
+  // Agrega más traducciones según sea necesario
+};
+
+
+
 const defaultColumn: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row, column, table }) => {
     // When the input is blurred, we'll call our table meta's updateData function
@@ -259,7 +278,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
           </div>
         );
 
-      }
+      },
+      header: ()=><span>Figma</span> 
     },
     "pdf":
     {
@@ -301,7 +321,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         );
       },
 
-      header: () => <span>pdf</span>,
+      header: () => <span>PDF</span>,
       footer: (props) => props.column.id,
     },
   }
@@ -604,24 +624,18 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
   const currenci: { [key: string]: string } = { "sol": "PEN", "dolar": "USD" }
 
 
-const traducciones:{[key:string]:string} = {
-  ninio: 'niño',
-  anio: 'año',
-  // Agrega más traducciones según sea necesario
-};
-
 
 function traducirVariable(texto:string) {
-     const palabrasConN:{[key:string]:string} = {
-    "ninio": "Niño",
-    "anio": "Año",
-    // Agrega otras palabras con "ñ" y sus equivalentes aquí
-  };
+  //    const palabrasConN:{[key:string]:string} = {
+  //   "ninio": "niño",
+  //   "anio": "año",
+  //   // Agrega otras palabras con "ñ" y sus equivalentes aquí
+  // };
   // Crear una expresión regular con todas las palabras con "ñ"
-  const regex = new RegExp(Object.keys(palabrasConN).join("|"), "gi");
+  const regex = new RegExp(Object.keys(traducciones).join("|"), "gi");
 
   // Reemplazar todas las instancias de palabras con "ñ" en el texto
-  return texto.replace(regex, match => palabrasConN[match.toLowerCase()]);
+  return texto.replace(regex, match => traducciones[match.toLowerCase()]);
 }
   function separarPorMayusculas(palabra:string) {
   // Utilizamos una expresión regular para dividir la cadena en palabras basadas en mayúsculas.
