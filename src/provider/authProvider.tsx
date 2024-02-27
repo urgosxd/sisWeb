@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-    InitialRoute,
-    RenderInfo,
+  InitialRoute,
+  RenderInfo,
   RenderMenu,
   RenderRoutes,
 } from "../components/structure/RenderNavigation";
@@ -31,14 +31,14 @@ export const AuthWrapper = () => {
   let [user, setUser] = useState(() =>
     localStorage.getItem("authTokens")
       ? {
-          name: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
-          role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
-          isAuthenticated: true,
-        }
+        name: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
+        role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
+        isAuthenticated: true,
+      }
       : { name: "", isAuthenticated: false, role: "" }
   );
 
-  const [currencyRate,setCurrencyRate] = useState(1)
+  const [currencyRate, setCurrencyRate] = useState(1)
 
   // const history = useHistory()
   // const router = useNavigate()
@@ -110,8 +110,8 @@ export const AuthWrapper = () => {
     authTokens: authTokens,
     login: loginUser,
     logout: logoutUser,
-    currencyRate:currencyRate,
-    setCurrencyRate:setCurrencyRate
+    currencyRate: currencyRate,
+    setCurrencyRate: setCurrencyRate
   };
 
   useEffect(() => {
@@ -141,12 +141,12 @@ export const AuthWrapper = () => {
 
         {
           user.isAuthenticated ?
-        <NavigationDash>
-          <RenderRoutes/>
-        </NavigationDash>
-        : <InitialRoute/>
-          
-      }
+            <NavigationDash>
+              <RenderRoutes />
+            </NavigationDash>
+            : <InitialRoute />
+
+        }
       </>
     </AuthContext.Provider>
   );

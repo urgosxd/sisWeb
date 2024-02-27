@@ -50,7 +50,7 @@ import HeaderTable from "./headerTable";
 interface Props {
   permission: boolean;
   url: string
-  baseColumns: { name: string, extra: string }[]
+  baseColumns: { name: string, extra: string,type:string }[]
   methods: {
     create: any
     update: any
@@ -604,42 +604,67 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
   const currenci: { [key: string]: string } = { "sol": "PEN", "dolar": "USD" }
 
 
+const traducciones:{[key:string]:string} = {
+  ninio: 'niño',
+  anio: 'año',
+  // Agrega más traducciones según sea necesario
+};
+
+
+function traducirVariable(texto:string) {
+     const palabrasConN:{[key:string]:string} = {
+    "ninio": "Niño",
+    "anio": "Año",
+    // Agrega otras palabras con "ñ" y sus equivalentes aquí
+  };
+  // Crear una expresión regular con todas las palabras con "ñ"
+  const regex = new RegExp(Object.keys(palabrasConN).join("|"), "gi");
+
+  // Reemplazar todas las instancias de palabras con "ñ" en el texto
+  return texto.replace(regex, match => palabrasConN[match.toLowerCase()]);
+}
+  function separarPorMayusculas(palabra:string) {
+  // Utilizamos una expresión regular para dividir la cadena en palabras basadas en mayúsculas.
+  const palabras = palabra.split(/(?=[A-Z])/);
+  // Unimos las palabras con un espacio.
+  return palabras.join(' ');
+}
 
   const gaa = baseColumns.map(ele => {
     if (special.includes(ele.name)) {
       return compSpecial[ele.name]
     } else {
       let ga = null
-      let type = ""
+      let ge = null
       switch (ele.extra) {
         case "none":
           ga = (row) => row[ele.name]
-          type = "string"
+          ge = ""
           break;
         case "time":
           ga = (row) => row[ele.name]
-          type = "string"
+          ge = ""
           break
         case "large":
           ga = (row) => row[ele.name]
-          type = "string"
+          ge = ""
           break
         case "tel":
           ga = (row) => row[ele.name]
-          type = "string"
+          ge = ""
           break
         default:
           ga = (row) => Number(row[ele.name])
-          type = "number"
+        ge = currenci[ele.extra]
           break;
       }
       return ({
         accessorFn: ga,
         // accessorFn: (row)=>console.log([`${ele.name}`]),
         id: ele.name,
-        header: `${ele.name[0].toUpperCase() + ele.name.slice(1)} ${ele.extra == "none" ? "" : currenci[ele.extra]} `,
+        header: `${ separarPorMayusculas(traducirVariable(ele.name[0].toUpperCase() + ele.name.slice(1)))} ${ge}`,
         meta: {
-          type: type
+          type: ele.type
         },
         footer: (props) => props.column.id
       })
@@ -707,7 +732,7 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
                   {headerGroup.headers.map((header) => {
                     return (
                       <th key={header.id} colSpan={header.colSpan} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                        {header.isPlaceholder ? null : (
+                       {header.isPlaceholder ? null : (
                           <HeaderTable header={header} table={table} >
                             <div
                               {...{
