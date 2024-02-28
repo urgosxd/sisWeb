@@ -34,8 +34,9 @@ export const AuthWrapper = () => {
         name: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
         role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
         isAuthenticated: true,
+        id: JSON.parse(localStorage.getItem("authTokens")!!).user.id,
       }
-      : { name: "", isAuthenticated: false, role: "" }
+      : { name: "", isAuthenticated: false, role: "",id:0 }
   );
 
   const [currencyRate, setCurrencyRate] = useState(1)
@@ -64,6 +65,7 @@ export const AuthWrapper = () => {
         name: data.user.username,
         isAuthenticated: true,
         role: data.user.role,
+        id: data.user.id
       });
       localStorage.setItem("authTokens", JSON.stringify(data));
       navigate("/tour");
@@ -76,6 +78,20 @@ export const AuthWrapper = () => {
     setAuthTokens(null);
     setUser({ ...user!!, isAuthenticated: false });
     localStorage.removeItem("authTokens");
+    const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+      const options: RequestInit = {
+        method: "PUT",
+        body: JSON.stringify("None"),
+        headers: {
+          Accept: "application/json, text/plain",
+          "Content-Type": "application/json;charset=UTF-8",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      // await fetchData({ url: url + `clean/${localStorage.getItem("")}/`, options });
+      // setCurrentId(prev=>"")
+      // localStorage.setItem("currentID","")
+    }
     navigate("/login");
     // router("/login")
     // history.push('/login')
@@ -98,6 +114,7 @@ export const AuthWrapper = () => {
         name: data.user.name,
         isAuthenticated: true,
         role: data.user.role,
+        id: data.user.id
       });
       localStorage.setItem("authTokens", JSON.stringify(data));
     } else {

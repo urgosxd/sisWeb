@@ -44,7 +44,7 @@ export const Tour = () => {
         TOURS
       </Typography>
       <NotificationToast/>
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
+      <RowTable baseColumns={baseColumns} user={user} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
     </div>
   );
 }

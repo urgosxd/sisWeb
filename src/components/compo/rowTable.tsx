@@ -57,6 +57,7 @@ interface Props {
   permission: boolean;
   url: string;
   baseColumns: { name: string; extra: string; type: string }[];
+  user: any
   methods: {
     create: any;
     update: any;
@@ -66,6 +67,7 @@ interface Props {
 
 import { ToastContainer, toast } from "react-toastify";
 import useSWRMutation from "swr/mutation";
+import { AuthProviderType } from "../../@types/authTypes";
 declare module "@tanstack/table-core" {
   interface FilterFns {
     fuzzy: FilterFn<unknown>;
@@ -102,6 +104,8 @@ declare module "@tanstack/react-table" {
     setUploadTime: React.Dispatch<React.SetStateAction<boolean[]>>;
     uploadTimeDel: boolean[];
     setUploadTimeDel: React.Dispatch<React.SetStateAction<boolean[]>>;
+    currentID:number
+    setCurrentID:React.Dispatch<React.SetStateAction<number>>
   }
 }
 // const aoeu =() => {
@@ -202,6 +206,20 @@ export async function createCRUD(url: string, { arg }) {
   return await fetchData({ url: url, options });
 }
 
+export async function deleteCRUD(url: string, { arg }) {
+  console.log(localStorage.getItem("authTokens"));
+  const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+  const options: RequestInit = {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    // headers: {
+    //     "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryYu134jq7TcPoELmF"
+    // }
+  };
+  return await fetchData({ url: url+`${arg.id}/`, options });
+}
 export async function updateCRUD(url: string, { arg }) {
   console.log(localStorage.getItem("authTokens"));
   const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
@@ -214,10 +232,24 @@ export async function updateCRUD(url: string, { arg }) {
       Authorization: `Bearer ${token}`,
     },
   };
-  return await fetchData({ url: url + `/${arg.id}/`, options });
+  return await fetchData({ url: url + `${arg.id}/`, options });
 }
 
-function RowTable({ permission, url, baseColumns, methods }: Props) {
+export async function updateCRUDUSER(url: string, { arg }) {
+  console.log(localStorage.getItem("authTokens"));
+  const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+  const options: RequestInit = {
+    method: "PUT",
+    body: JSON.stringify(arg.data),
+    headers: {
+      Accept: "application/json, text/plain",
+      "Content-Type": "application/json;charset=UTF-8",
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  return await fetchData({ url: url + `clean/${arg.id}/`, options });
+}
+function RowTable({ permission,user, url, baseColumns, methods }: Props) {
   // function gaa(baseColumns:any){
   //  const names = baseColumns.map(ele=>ele.name)
   //  const values = ["","",jk]
@@ -238,7 +270,14 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     url,
     updateCRUD
   );
-
+const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
+    url,
+    updateCRUDUSER
+  );
+  const { error: ee4, trigger: triggerDelete } = useSWRMutation(
+    url,
+    deleteCRUD
+  );
   const [ErrFecth, setErrFetch] = useState(false);
   console.log(data || 0);
   const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -274,17 +313,15 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
 
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const [currentID, setCurrentId] = useState(
-    localStorage.getItem("currentId")
-      ? JSON.parse(localStorage.getItem("currentId")!!)
-      : ""
+  const [currentID, setCurrentID] = React.useState(
+    localStorage.getItem("currentID")?JSON.parse(localStorage.getItem("currentID")!!):0
   );
   const Add = async () => {
     const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-    if (currentID !== "") {
+    if (currentID !== 0 ) {
       const options: RequestInit = {
         method: "PUT",
-        body: JSON.stringify(""),
+        body: JSON.stringify("None"),
         headers: {
           Accept: "application/json, text/plain",
           "Content-Type": "application/json;charset=UTF-8",
@@ -292,6 +329,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
         },
       };
       await fetchData({ url: url + `clean/${currentID}/`, options });
+      // setCurrentId(prev=>"")
+      // localStorage.setItem("currentID","")
     }
     setIsCreating((prev) => !prev);
   };
@@ -487,12 +526,10 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
     try {
       // const respuesta = await methods.create(formData);
       const respuesta = await triggerCreate(formData);
-      if (respuesta) {
-        setCurrentId(`${respuesta.id}`);
-        localStorage.setItem("currentID", JSON.stringify(respuesta.id));
+        setCurrentID(prev=>respuesta.id);
+        localStorage.setItem("currentID", respuesta.id);
         setIsCreating((prev) => false);
         setCreateUpload((prev) => false);
-      }
     } catch (error) {
       setCreateUpload((prev) => false);
       setErrFetch((prev) => true);
@@ -576,19 +613,24 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
       cell: ({ getValue, row, column: { id }, table }) => {
         const Editable = async () => {
           const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-          if (currentID !== "") {
+          if (currentID !== 0) {
             const options: RequestInit = {
               method: "PUT",
-              body: JSON.stringify(""),
+              body: JSON.stringify("None"),
               headers: {
                 Accept: "application/json, text/plain",
                 "Content-Type": "application/json;charset=UTF-8",
                 Authorization: `Bearer ${token}`,
               },
             };
-            await fetchData({ url: url + `clean/${currentID}/`, options });
-          }
-
+            await fetchData({ url: url + `clean/${table.options.meta?.currentID}/`, options });
+            // setCurrentId(prev=>"")
+            // localStorage.setItem("currentID","")
+            console.log("GESSS")
+          } 
+          const resp = await triggerUpdateUser({data:user.id,id:row.original.id})
+          table.options.meta?.setCurrentID((ele)=> row.original.id)
+          localStorage.setItem("currentID",row.original.id)
           table.options.meta?.setEdites((el) =>
             el.map((ele, idx) => (idx == row.index ? true : false))
           );
@@ -637,8 +679,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
               id: row.original.id,
               data: formObj,
             });
-            setCurrentId(`${respuesta.id}`);
-            localStorage.setItem("currentID", JSON.stringify(respuesta.id));
+            tableoptions.meta?.setCurrentID(prev=>respuesta.id);
+            localStorage.setItem("currentID", respuesta.id);
             setUploadTime((prev) => Array.from(data || [], (_) => false));
             setEdites((prev) => Array.from(data || [], (_) => false));
           } catch (error) {
@@ -686,7 +728,7 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
           );
 
           try {
-            await methods.delete(row.original.id);
+            await triggerDelete({id:row.original.id});
             setUploadTimeDel((ele) =>
               ele.map((ele, idx) => (idx == row.index ? false : ele))
             );
@@ -802,6 +844,8 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
       setUploadTime,
       uploadTimeDel,
       setUploadTimeDel,
+      currentID,
+      setCurrentID
     },
     defaultColumn,
     onColumnFiltersChange: setColumnFilters,
@@ -1086,7 +1130,9 @@ function RowTable({ permission, url, baseColumns, methods }: Props) {
               table.getRowModel().rows.map((row, index) => {
                 console.log(row);
                 return (
-                  <tr key={row.id} className="even:bg-blue-gray-50/50">
+                  <tr key={row.id} className={`even:bg-blue-gray-50/50 ${row.original.currentUser ? "border-4 border-indigo-600": ""}`} >
+                      
+                      {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
                     {row.getVisibleCells().map((cell) => {
                       return (
                         <td key={cell.id} className="p-4">

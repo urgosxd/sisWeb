@@ -5,6 +5,10 @@
   text-align: center;
 }
 
+.header {
+  color:white;
+  background:cadetblue;
+}
 .logo {
   height: 6em;
   padding: 1.5em;
