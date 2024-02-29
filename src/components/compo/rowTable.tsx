@@ -17,6 +17,7 @@ import {
   PopoverHandler,
   PopoverContent,
   IconButton,
+  Badge
 } from "@material-tailwind/react";
 import NotificationToast from "../compo/notification";
 import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
@@ -68,6 +69,7 @@ interface Props {
 import { ToastContainer, toast } from "react-toastify";
 import useSWRMutation from "swr/mutation";
 import { AuthProviderType } from "../../@types/authTypes";
+import PopOver from "./popOver";
 declare module "@tanstack/table-core" {
   interface FilterFns {
     fuzzy: FilterFn<unknown>;
@@ -467,32 +469,32 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
 
 
   const lastCurrent = useRef<number>()
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     lastCurrent.current = currentID
 
     console.log(lastCurrent.current)
 
-  },[currentID])
-  const cleanID = async ()=> {
-        const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-        console.log("entro")
-        if (lastCurrent.current !== 0) {
-          console.log(currentID)
-          const options: RequestInit = {
-            method: "PUT",
-            body: JSON.stringify("None"),
-            headers: {
-              Accept: "application/json, text/plain",
-              "Content-Type": "application/json;charset=UTF-8",
-              Authorization: `Bearer ${token}`,
-            },
-          };
+  }, [currentID])
+  const cleanID = async () => {
+    const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+    console.log("entro")
+    if (lastCurrent.current !== 0) {
+      console.log(currentID)
+      const options: RequestInit = {
+        method: "PUT",
+        body: JSON.stringify("None"),
+        headers: {
+          Accept: "application/json, text/plain",
+          "Content-Type": "application/json;charset=UTF-8",
+          Authorization: `Bearer ${token}`,
+        },
+      };
 
-          await fetchData({ url: url + `clean/${lastCurrent.current}/`, options });
+      await fetchData({ url: url + `clean/${lastCurrent.current}/`, options });
 
-        }
-      }
+    }
+  }
 
   useEffect(() => {
     console.log("MONTADOOO")
@@ -717,17 +719,19 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
               id: row.original.id,
               data: formObj,
             });
-            tableoptions.meta?.setCurrentID(prev => respuesta.id);
+            table.options.meta?.setCurrentID(prev => respuesta.id);
             localStorage.setItem("currentID", respuesta.id);
             setUploadTime((prev) => Array.from(data || [], (_) => false));
             setEdites((prev) => Array.from(data || [], (_) => false));
           } catch (error) {
+            console.log(error)
             setErrFetch((prev) => true);
             setEdites((prev) => Array.from(data || [], (_) => false));
           }
           return;
         };
 
+        console.log(row.original.currentUser)
         const meta = table.options.meta;
         return meta?.edits[row.index] ? (
           <div className="edit-cell">
@@ -744,13 +748,13 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           </div>
         ) : (
           <div>
-            {row.original.currentUser ? 
-                row.original.currentUser !== user.id ? (<div></div>) : (<button onClick={Editable} name="edit">
+            {row.original.currentUser ?
+              row.original.currentUser !== user.id ? (<div></div>) : (<button onClick={Editable} name="edit">
                 ✐
               </button>
-            )
-                  :
-              <button onClick={Editable} name="edit">
+              )
+              :
+              <button name="edit" onClick={Editable}>
                 ✐
               </button>
             }
@@ -915,18 +919,18 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
         />
       </div>
       <Card className="h-full w-full overflow-scroll">
-        <table className="w-full min-w-max table-auto text-left">
-          <thead>
+        <div className="table border-collapse w-full min-w-max table-auto text-left">
+          <div className="table-header-group">
             {isLoading
               ? "aoe"
               : table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
+                <div key={headerGroup.id} className="table-row">
                   {headerGroup.headers.map((header) => {
                     return (
-                      <th
+                      <div
                         key={header.id}
-                        colSpan={header.colSpan}
-                        className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                        // colSpan={header.colSpan}
+                        className="table-cell border-b border-blue-gray-100 bg-blue-gray-50 p-4"
                       >
                         {header.isPlaceholder ? null : (
                           <HeaderTable header={header} table={table}>
@@ -951,15 +955,15 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                             </div>
                           </HeaderTable>
                         )}
-                      </th>
+                      </div>
                     );
                   })}
-                </tr>
+                </div>
               ))}
-          </thead>
-          <tbody>
+          </div>
+          <div className="table-row-group">
             {<form id="CreateForm" onSubmit={createForm}></form>}
-            <tr>
+            <div className="table-row">
               {permission &&
                 isCreating &&
                 baseColumns.map((ele) => {
@@ -1038,7 +1042,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                   )}
                 </td>
               )}
-            </tr>
+            </div>
             {/* { permission && isCreating && ( */}
             {/*   <tr> */}
             {/*     <td className={"p-4 border-b border-blue-gray-50"}> */}
@@ -1170,26 +1174,31 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
             ) : (
               table.getRowModel().rows.map((row, index) => {
                 console.log(row);
-                return (
-                  <tr key={row.id} className={`even:bg-blue-gray-50/50 ${row.original.currentUser ? "border-4 border-indigo-600" : ""}`} >
 
-                    {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id} className="p-4">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
+                return  row.original.currentUser ?
+
+                     <PopOver row={row} content={row.original.currentUser}/>:
+                  <div key={row.id} className={`even:bg-blue-gray-50/50  table-row `} >
+                      {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <div key={cell.id} className="table-cell p-4">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
+                        );
+                      })}
+
+                    </div>
+
+                    
+                
               })
             )}
-          </tbody>
-        </table>
+          </div>
+        </div>
         {data && (
           <div className="mx-auto">
             <div className="flex items-center gap-2">

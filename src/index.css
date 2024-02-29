@@ -70,3 +70,17 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+.tb {
+ border: 2px groove threedface;
+  padding: 1em;
+}
+.tb h1 {
+  float: left;
+  margin: -1.7em 0 0;
+  padding: 0 .5em;
+  background: #fff;
+  font-size: 1em;
+  font-weight: normal;
+}
