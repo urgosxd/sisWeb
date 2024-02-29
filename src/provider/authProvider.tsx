@@ -78,24 +78,24 @@ export const AuthWrapper = () => {
     setAuthTokens(null);
     setUser({ ...user!!, isAuthenticated: false });
     localStorage.removeItem("authTokens");
-    const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-      const options: RequestInit = {
-        method: "PUT",
-        body: JSON.stringify("None"),
-        headers: {
-          Accept: "application/json, text/plain",
-          "Content-Type": "application/json;charset=UTF-8",
-          Authorization: `Bearer ${token}`,
-        },
-      };
+    // const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+    //   const options: RequestInit = {
+    //     method: "PUT",
+    //     body: JSON.stringify("None"),
+    //     headers: {
+    //       Accept: "application/json, text/plain",
+    //       "Content-Type": "application/json;charset=UTF-8",
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   };
       // await fetchData({ url: url + `clean/${localStorage.getItem("")}/`, options });
       // setCurrentId(prev=>"")
       // localStorage.setItem("currentID","")
-    }
     navigate("/login");
+    }
     // router("/login")
     // history.push('/login')
-  };
+  //
 
   let updateToken = async () => {
     let response = await fetch(BASEURL + "apiAuth/tokken/refresh/", {

@@ -104,8 +104,8 @@ declare module "@tanstack/react-table" {
     setUploadTime: React.Dispatch<React.SetStateAction<boolean[]>>;
     uploadTimeDel: boolean[];
     setUploadTimeDel: React.Dispatch<React.SetStateAction<boolean[]>>;
-    currentID:number
-    setCurrentID:React.Dispatch<React.SetStateAction<number>>
+    currentID: number
+    setCurrentID: React.Dispatch<React.SetStateAction<number>>
   }
 }
 // const aoeu =() => {
@@ -218,7 +218,7 @@ export async function deleteCRUD(url: string, { arg }) {
     //     "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryYu134jq7TcPoELmF"
     // }
   };
-  return await fetchData({ url: url+`${arg.id}/`, options });
+  return await fetchData({ url: url + `${arg.id}/`, options });
 }
 export async function updateCRUD(url: string, { arg }) {
   console.log(localStorage.getItem("authTokens"));
@@ -249,7 +249,7 @@ export async function updateCRUDUSER(url: string, { arg }) {
   };
   return await fetchData({ url: url + `clean/${arg.id}/`, options });
 }
-function RowTable({ permission,user, url, baseColumns, methods }: Props) {
+function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   // function gaa(baseColumns:any){
   //  const names = baseColumns.map(ele=>ele.name)
   //  const values = ["","",jk]
@@ -270,7 +270,7 @@ function RowTable({ permission,user, url, baseColumns, methods }: Props) {
     url,
     updateCRUD
   );
-const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
+  const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
     url,
     updateCRUDUSER
   );
@@ -314,11 +314,11 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const [currentID, setCurrentID] = React.useState(
-    localStorage.getItem("currentID")?JSON.parse(localStorage.getItem("currentID")!!):0
+    0
   );
   const Add = async () => {
     const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-    if (currentID !== 0 ) {
+    if (currentID !== 0) {
       const options: RequestInit = {
         method: "PUT",
         body: JSON.stringify("None"),
@@ -464,6 +464,44 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
     }
     notify("Error");
   }, [ErrFecth]);
+
+
+  const lastCurrent = useRef<number>()
+  
+  useEffect(()=>{
+    lastCurrent.current = currentID
+
+    console.log(lastCurrent.current)
+
+  },[currentID])
+  const cleanID = async ()=> {
+        const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+        console.log("entro")
+        if (lastCurrent.current !== 0) {
+          console.log(currentID)
+          const options: RequestInit = {
+            method: "PUT",
+            body: JSON.stringify("None"),
+            headers: {
+              Accept: "application/json, text/plain",
+              "Content-Type": "application/json;charset=UTF-8",
+              Authorization: `Bearer ${token}`,
+            },
+          };
+
+          await fetchData({ url: url + `clean/${lastCurrent.current}/`, options });
+
+        }
+      }
+
+  useEffect(() => {
+    console.log("MONTADOOO")
+    // cleanID()
+    return () => {
+      console.log("GAA")
+      cleanID()
+    }
+  }, [currentID])
   const myForm = useRef<HTMLFormElement | null>(null);
 
   function getDataFromFileName(path: string) {
@@ -526,10 +564,10 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
     try {
       // const respuesta = await methods.create(formData);
       const respuesta = await triggerCreate(formData);
-        setCurrentID(prev=>respuesta.id);
-        localStorage.setItem("currentID", respuesta.id);
-        setIsCreating((prev) => false);
-        setCreateUpload((prev) => false);
+      setCurrentID(prev => respuesta.id);
+      localStorage.setItem("currentID", respuesta.id);
+      setIsCreating((prev) => false);
+      setCreateUpload((prev) => false);
     } catch (error) {
       setCreateUpload((prev) => false);
       setErrFetch((prev) => true);
@@ -613,7 +651,7 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
       cell: ({ getValue, row, column: { id }, table }) => {
         const Editable = async () => {
           const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-          if (currentID !== 0) {
+          if (table.options.meta?.currentID !== 0) {
             const options: RequestInit = {
               method: "PUT",
               body: JSON.stringify("None"),
@@ -627,10 +665,10 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
             // setCurrentId(prev=>"")
             // localStorage.setItem("currentID","")
             console.log("GESSS")
-          } 
-          const resp = await triggerUpdateUser({data:user.id,id:row.original.id})
-          table.options.meta?.setCurrentID((ele)=> row.original.id)
-          localStorage.setItem("currentID",row.original.id)
+          }
+          const resp = await triggerUpdateUser({ data: user.id, id: row.original.id })
+          table.options.meta?.setCurrentID((ele) => row.original.id)
+          localStorage.setItem("currentID", row.original.id)
           table.options.meta?.setEdites((el) =>
             el.map((ele, idx) => (idx == row.index ? true : false))
           );
@@ -679,7 +717,7 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
               id: row.original.id,
               data: formObj,
             });
-            tableoptions.meta?.setCurrentID(prev=>respuesta.id);
+            tableoptions.meta?.setCurrentID(prev => respuesta.id);
             localStorage.setItem("currentID", respuesta.id);
             setUploadTime((prev) => Array.from(data || [], (_) => false));
             setEdites((prev) => Array.from(data || [], (_) => false));
@@ -706,13 +744,16 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
           </div>
         ) : (
           <div>
-            {permission ? (
+            {row.original.currentUser ? 
+                row.original.currentUser !== user.id ? (<div></div>) : (<button onClick={Editable} name="edit">
+                ✐
+              </button>
+            )
+                  :
               <button onClick={Editable} name="edit">
                 ✐
               </button>
-            ) : (
-              <div></div>
-            )}
+            }
           </div>
         );
       },
@@ -728,7 +769,7 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
           );
 
           try {
-            await triggerDelete({id:row.original.id});
+            await triggerDelete({ id: row.original.id });
             setUploadTimeDel((ele) =>
               ele.map((ele, idx) => (idx == row.index ? false : ele))
             );
@@ -1130,9 +1171,9 @@ const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
               table.getRowModel().rows.map((row, index) => {
                 console.log(row);
                 return (
-                  <tr key={row.id} className={`even:bg-blue-gray-50/50 ${row.original.currentUser ? "border-4 border-indigo-600": ""}`} >
-                      
-                      {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
+                  <tr key={row.id} className={`even:bg-blue-gray-50/50 ${row.original.currentUser ? "border-4 border-indigo-600" : ""}`} >
+
+                    {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
                     {row.getVisibleCells().map((cell) => {
                       return (
                         <td key={cell.id} className="p-4">
