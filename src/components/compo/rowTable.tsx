@@ -51,7 +51,7 @@ import {
 } from "@tanstack/match-sorter-utils";
 import DebouncedInput from "./debounceInput";
 import Filter from "./filter";
-import useSkipper from "../hooks/skipper";
+// import useSkipper from "../hooks/skipper";
 import HeaderTable from "./headerTable";
 
 interface Props {
@@ -184,6 +184,7 @@ const ERROR_MSG = "Oops! Something went wrong";
 const fetchData = async function({ url, options }: FetchData): Promise<any> {
   const response = await fetch(url, options);
 
+  
   if (!response.ok) {
     throw new Error(ERROR_MSG);
   }
@@ -237,6 +238,21 @@ export async function updateCRUD(url: string, { arg }) {
   return await fetchData({ url: url + `${arg.id}/`, options });
 }
 
+function useSkipper() {
+  const shouldSkipRef = React.useRef(true)
+  const shouldSkip = shouldSkipRef.current
+
+  // Wrap a function with this to skip a pagination reset temporarily
+  const skip = React.useCallback(() => {
+    shouldSkipRef.current = false
+  }, [])
+
+  React.useEffect(() => {
+    shouldSkipRef.current = true
+  })
+
+  return [shouldSkip, skip] as const
+}
 export async function updateCRUDUSER(url: string, { arg }) {
   console.log(localStorage.getItem("authTokens"));
   const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
@@ -345,6 +361,10 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   const [uploadTimeDel, setUploadTimeDel] = useState(
     Array.from(data || [], (_) => false)
   );
+
+
+    
+  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
   const [createUpload, setCreateUpload] = useState(false);
 
   const fileTypes = ["PDF"];
@@ -538,11 +558,14 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   useEffect(() => {
     console.log("MONTADOOO")
     // cleanID()
+    window.addEventListener('beforeunload',cleanID)
     return () => {
       console.log("GAA")
       cleanID()
+      window.removeEventListener('beforeunload',cleanID)
     }
   }, [currentID])
+
   const myForm = useRef<HTMLFormElement | null>(null);
 
   function getDataFromFileName(path: string) {
@@ -707,9 +730,10 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
             // localStorage.setItem("currentID","")
             console.log("GESSS")
           }
-          const resp = await triggerUpdateUser({ data: user.id, id: row.original.id })
+          table.options.meta?.updateData(row)
+          // const resp = await triggerUpdateUser({ data: user.id, id: row.original.id  })
           table.options.meta?.setCurrentID((ele) => row.original.id)
-          localStorage.setItem("currentID", row.original.id)
+          // localStorage.setItem("currentID", row.original.id)
           table.options.meta?.setEdites((el) =>
             el.map((ele, idx) => (idx == row.index ? true : false))
           );
@@ -770,7 +794,6 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           return;
         };
 
-        console.log(row.original.currentUser)
         const meta = table.options.meta;
         return meta?.edits[row.index] ? (
           <div className="edit-cell">
@@ -910,9 +933,13 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     .concat(auxiliare);
   const columns = React.useMemo<ColumnDef<any, any>[]>(() => gaa, []);
 
+
+
+
   const table = useReactTable({
     data,
     columns,
+    autoResetPageIndex,
     filterFns: {
       fuzzy: fuzzyFilter,
     },
@@ -929,7 +956,13 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       uploadTimeDel,
       setUploadTimeDel,
       currentID,
-      setCurrentID
+      setCurrentID,
+      updateData: async(row) => {
+        console.log("GAAAROWW")
+        skipAutoResetPageIndex()
+        await triggerUpdateUser({ data: user.id, id: row.original.id  })
+        skipAutoResetPageIndex()
+      }, 
     },
     defaultColumn,
     onColumnFiltersChange: setColumnFilters,
