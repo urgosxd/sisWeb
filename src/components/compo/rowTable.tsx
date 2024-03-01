@@ -170,7 +170,7 @@ const defaultColumn: Partial<ColumnDef<any>> = {
   },
 };
 
-const special = ["figma", "pdf"];
+const special = ["recomendacionesImagen", "fichaTecnica","pdfProveedor"];
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // async function sendRequest(url:string, { arg }) {
@@ -352,9 +352,9 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   const [file, setFile] = useState<Array<File | undefined>>([]);
 
   const compSpecial = {
-    figma: {
-      accessorFn: (row) => row.figma,
-      id: "figma",
+    recomendacionesImagen: {
+      accessorkey: `recomendacionesImagen`,
+      id: "recomendacionesImagen",
       cell: ({ getValue, row, column, table }) => {
         let initialValue = getValue() as string;
         // if(column.id == "ppp"){
@@ -393,11 +393,11 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           </div>
         );
       },
-      header: () => <span>Figma</span>,
+      header: () => <span>Recomendacion Imagen</span>,
     },
-    pdf: {
-      accessorkey: `pdf`,
-      id: "drive",
+    fichaTecnica: {
+      accessorkey: `fichaTecnica`,
+      id: "fichaTecnica",
       cell: ({ getValue, row, column, table }) => {
         let initialValue = getValue() as string;
         const tableMeta = table.options.meta;
@@ -427,14 +427,53 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           <div className="w-36">
             <a href={initialValue as string} target="_blank">
               {" "}
-              Link Drive
+              Link
             </a>
           </div>
         );
       },
 
-      header: () => <span>PDF</span>,
-      footer: (props) => props.column.id,
+      header: () => <span>Ficha Tecnica</span>,
+    },
+    pdfProveedor: {
+      accessorkey: `pdfProveedor`,
+      id: "pdfProveedor",
+      cell: ({ getValue, row, column, table }) => {
+        let initialValue = getValue() as string;
+        const tableMeta = table.options.meta;
+        const [value, setValue] = React.useState(initialValue);
+        React.useEffect(() => {
+          setValue(initialValue);
+        }, [initialValue]);
+        const onBlur = () => {
+          const idx = column.id;
+          tableMeta!.tempEditData[idx] = value;
+        };
+
+        return tableMeta?.edits[row.index] ? (
+          <div className="w-36">
+            <Input
+              // type={typeof initialValue === 'number' ? "number" : "text"}
+              type="text"
+              value={value as string}
+              onChange={(e) => setValue(e.target.value)}
+              onBlur={onBlur}
+              containerProps={{
+                className: "!min-w-0",
+              }}
+            />
+          </div>
+        ) : (
+          <div className="w-36">
+            <a href={initialValue as string} target="_blank">
+              {" "}
+              Link
+            </a>
+          </div>
+        );
+      },
+
+      header: () => <span>Pdf Proveedor</span>,
     },
   };
 
@@ -971,7 +1010,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                   //   .getPreFilteredRowModel()
                   //   .flatRows[0]?.getValue(header.column.id)
                   //
-                  if (ele.name == "figma") {
+                  if (ele.name == "recomendacionesImagen") {
                     return (
                       <td>
                         <Input
@@ -988,14 +1027,14 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                         />
                       </td>
                     );
-                  } else if (ele.name == "pdf") {
+                  } else if (ele.name == "fichaTecnica") {
                     return (
                       <td>
                         <Input
                           type="text"
                           defaultValue={""}
                           placeholder={ele.name as string}
-                          name="drive"
+                          name={ele.name as string}
                           className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
                           labelProps={{
                             className: "hidden",
@@ -1006,6 +1045,26 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                       </td>
                     );
                   }
+
+                      else if (ele.name == "pdfProveedor") {
+                    return (
+                      <td>
+                        <Input
+                          type="text"
+                          defaultValue={""}
+                          placeholder={ele.name as string}
+                          className="!border !border-gray-300 bg-white text-gray-900 shadow-lg shadow-gray-900/5 ring-4 ring-transparent placeholder:text-gray-500 focus:!border-gray-900 focus:!border-t-gray-900 focus:ring-gray-900/10"
+                          name={ele.name as string}
+                          labelProps={{
+                            className: "hidden",
+                          }}
+                          form="CreateForm"
+                          containerProps={{ className: "min-w-36 !w-36" }}
+                        />
+                      </td>
+                    );
+                  }
+
                   return (
                     !special.includes(ele.name as string) && (
                       <td>

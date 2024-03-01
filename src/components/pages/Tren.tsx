@@ -30,11 +30,19 @@ export const Tren = () => {
     {name:"empresa",extra:"none",type: "text"},
     {name:"ruta",extra:"none",type: "text"},
     {name:"categoria",extra:"none",type: "text"},
-    {name:"precioAdulto",extra:"dolar",type:"number"},
-    {name:"precioNinio",extra:"dolar",type:"number"},
-    {name:"precioInfante",extra:"dolar",type:"number"},
+    {name:"adulto",extra:"dolar",type:"number"},
+    {name:"ninio",extra:"dolar",type:"number"},
+    {name:"infante",extra:"dolar",type:"number"},
   ]
-
+ const baseColumnsV = [
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"empresa",extra:"none",type: "text"},
+    {name:"ruta",extra:"none",type: "text"},
+    {name:"categoria",extra:"none",type: "text"},
+    {name:"adulto",extra:"dolar",type:"number"},
+    {name:"ninio",extra:"dolar",type:"number"},
+    {name:"infante",extra:"dolar",type:"number"},
+  ]
   return (
     <div>
       <Typography>
@@ -42,7 +50,7 @@ export const Tren = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/trenes/tren/`} methods={{ create: createTren, update: updateTren, delete: deleteTren }} />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/trenes/tren/`} methods={{ create: createTren, update: updateTren, delete: deleteTren }} />
     </div>
   );
 }

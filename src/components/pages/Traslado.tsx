@@ -29,8 +29,14 @@ export const Traslado = () => {
     {name:"ciudad",extra:"none",type: "text"},
     {name:"servicio",extra:"none",type: "text"},
     {name:"tipoDeVehiculo",extra:"none",type: "text"},
-    {name:"ppp",extra:"sol",type:"number"},
-    {name:"ppe",extra:"dolar",type:"number"},
+    {name:"precio",extra:"sol",type:"number"},
+  ]
+
+  const baseColumnsV = [
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"servicio",extra:"none",type: "text"},
+    // {name:"tipoDeVehiculo",extra:"none",type: "text"},
+    {name:"precio",extra:"sol",type:"number"},
   ]
 
   return (
@@ -40,7 +46,7 @@ export const Traslado = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/traslados/traslado/`} methods={{ create: createTraslado, update: updateTraslado, delete: deleteTraslado }} />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/traslados/traslado/`} methods={{ create: createTraslado, update: updateTraslado, delete: deleteTraslado }} />
     </div>
   );
 }

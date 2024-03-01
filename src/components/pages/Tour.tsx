@@ -24,17 +24,31 @@ export const Tour = () => {
 
 
   const baseColumns = [
-    {name:"ciudad",extra:"none",type:"text"},
-    {name:"excursion",extra:"none",type:"text"},
-    {name:"provedor",extra:"none",type:"text"},
-    {name:"ppp",extra:"sol",type:"number"},
-    {name:"ppe",extra:"dolar",type:"number"},
-    {name:"pvp",extra:"sol",type:"number"},
-    {name:"pve",extra:"dolar",type:"number"},
-    {name:"figma",extra:"none",type:"text"},
-    {name:"pdf",extra:"none",type:"file"},
+    { name: "ciudad", extra: "none", type: "text" },
+    { name: "excursion", extra: "none", type: "text" },
+    { name: "provedor", extra: "none", type: "text" },
+    { name: "pe", extra: "sol", type: "number" },
+    { name: "ppp", extra: "sol", type: "number" },
+    { name: "ppe", extra: "dolar", type: "number" },
+    { name: "pvp", extra: "sol", type: "number" },
+    { name: "pve", extra: "dolar", type: "number" },
+    { name: "recomendacionesImagen", extra: "link", type: "text" },
+    { name: "fichaTecnica", extra: "link", type: "text" },
+    { name: "pdfProveedor", extra: "link", type: "text" },
   ]
 
+  const baseColumnsV = [
+    { name: "ciudad", extra: "none", type: "text" },
+    { name: "excursion", extra: "none", type: "text" },
+    { name: "provedor", extra: "none", type: "text" },
+    // {name:"pe",extra:"sol",type:"number"},
+    { name: "ppp", extra: "sol", type: "number" },
+    { name: "ppe", extra: "dolar", type: "number" },
+    { name: "pvp", extra: "sol", type: "number" },
+    { name: "pve", extra: "dolar", type: "number" },
+    { name: "recomendacionesImagen", extra: "link", type: "text" },
+    { name: "fichaTecnica", extra: "link", type: "text" },
+  ]
 
   console.log(import.meta.env.VITE_URL_BACK)
 
@@ -43,8 +57,8 @@ export const Tour = () => {
       <Typography>
         TOURS
       </Typography>
-      <NotificationToast/>
-      <RowTable baseColumns={baseColumns} user={user} permission={true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
+      <NotificationToast />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
     </div>
   );
 }
