@@ -51,7 +51,6 @@ import {
 } from "@tanstack/match-sorter-utils";
 import DebouncedInput from "./debounceInput";
 import Filter from "./filter";
-// import useSkipper from "../hooks/skipper";
 import HeaderTable from "./headerTable";
 
 interface Props {
@@ -172,6 +171,16 @@ const defaultColumn: Partial<ColumnDef<any>> = {
 
 const special = ["recomendacionesImagen", "fichaTecnica","pdfProveedor"];
 
+async function getCrud(url:string){
+  const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+  const options = {
+method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+ return await fetchData({url,options})
+}
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // async function sendRequest(url:string, { arg }) {
 //   return fetch(url, {
@@ -277,7 +286,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     url,
-    fetcher,
+    getCrud,
     { refreshInterval: 10 }
     // fetcher
   );
