@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { DocumentIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 import {
   FetchData,
@@ -107,6 +107,7 @@ declare module "@tanstack/react-table" {
     setUploadTimeDel: React.Dispatch<React.SetStateAction<boolean[]>>;
     currentID: number
     setCurrentID: React.Dispatch<React.SetStateAction<number>>
+    updateData: (row: any) => any
   }
 }
 // const aoeu =() => {
@@ -169,17 +170,17 @@ const defaultColumn: Partial<ColumnDef<any>> = {
   },
 };
 
-const special = ["recomendacionesImagen", "fichaTecnica","pdfProveedor"];
+const special = ["recomendacionesImagen", "fichaTecnica", "pdfProveedor"];
 
-async function getCrud(url:string){
+async function getCrud(url: string) {
   const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
   const options = {
-method: "GET",
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   }
- return await fetchData({url,options})
+  return await fetchData({ url, options })
 }
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // async function sendRequest(url:string, { arg }) {
@@ -193,7 +194,7 @@ const ERROR_MSG = "Oops! Something went wrong";
 const fetchData = async function({ url, options }: FetchData): Promise<any> {
   const response = await fetch(url, options);
 
-  
+
   if (!response.ok) {
     throw new Error(ERROR_MSG);
   }
@@ -283,11 +284,12 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   // }
 
   const notify = (message: string) => toast(message);
+  // const { mutate } = useSWRConfig()
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     url,
     getCrud,
-    { refreshInterval: 10 }
+    // { refreshInterval: 100 }
     // fetcher
   );
 
@@ -297,10 +299,17 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     url,
     updateCRUD
   );
+
+
+
   const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
     url,
     updateCRUDUSER
   );
+
+
+
+
   const { error: ee4, trigger: triggerDelete } = useSWRMutation(
     url,
     deleteCRUD
@@ -372,7 +381,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   );
 
 
-    
+
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
   const [createUpload, setCreateUpload] = useState(false);
 
@@ -567,11 +576,11 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   useEffect(() => {
     console.log("MONTADOOO")
     // cleanID()
-    window.addEventListener('beforeunload',cleanID)
+    window.addEventListener('beforeunload', cleanID)
     return () => {
       console.log("GAA")
       cleanID()
-      window.removeEventListener('beforeunload',cleanID)
+      window.removeEventListener('beforeunload', cleanID)
     }
   }, [currentID])
 
@@ -739,13 +748,14 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
             // localStorage.setItem("currentID","")
             console.log("GESSS")
           }
-          table.options.meta?.updateData(row)
-          // const resp = await triggerUpdateUser({ data: user.id, id: row.original.id  })
+          // const resp = await triggerUpdateUser({ data: user.id, id: row.original.id  },{optimisticData:[...data,{...row.original,currentUser:user.id}]})
+          table.options.meta?.updateData(row, table.options.meta?.setEdites,triggerUpdateUser)
           table.options.meta?.setCurrentID((ele) => row.original.id)
           // localStorage.setItem("currentID", row.original.id)
           table.options.meta?.setEdites((el) =>
             el.map((ele, idx) => (idx == row.index ? true : false))
           );
+
         };
 
         const Cancel = () => {
@@ -966,12 +976,50 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       setUploadTimeDel,
       currentID,
       setCurrentID,
-      updateData: async(row) => {
+      updateData: async (row, func,funn) => {
         console.log("GAAAROWW")
         skipAutoResetPageIndex()
-        await triggerUpdateUser({ data: user.id, id: row.original.id  })
+        // const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+        //   if (currId !== 0) {
+        //     const options: RequestInit = {
+        //       method: "PUT",
+        //       body: JSON.stringify("None"),
+        //       headers: {
+        //         Accept: "application/json, text/plain",
+        //         "Content-Type": "application/json;charset=UTF-8",
+        //         Authorization: `Bearer ${token}`,
+        //       },
+        //     };
+        //     await fetchData({ url: url + `clean/${currId}/`, options });
+        //   }
+      //   await mutate(url, async () => {
+      //     const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+      //     const options: RequestInit = {
+      //       method: "PUT",
+      //       body: JSON.stringify(user.id),
+      //       headers: {
+      //         Accept: "application/json, text/plain",
+      //         "Content-Type": "application/json;charset=UTF-8",
+      //         Authorization: `Bearer ${token}`,
+      //       },
+      //     }
+      //     return await fetchData({ url: url + `clean/${row.original.id}/`, options });
+      //   }
+      //     , {
+      //       populateCache: (updated, table) => {
+      //         const filtered = table.filter(rowF => rowF.id !== row.original.id)
+      //         return [...filtered, updated]
+      //       },
+      //       revalidate: false
+      //     }
+      //   )
+        await funn({ data: user.id, id: row.original.id  }/* ,{optimisticData:[...data,{...row.original,currentUser:user.id}]} */)
         skipAutoResetPageIndex()
-      }, 
+        // func((el) =>
+        //   el.map((ele, idx) => (idx == row.index ? true : false))
+        // )
+      //   // await triggerUpdateUser({ data: user.id, id: row.original.id  })
+      },
     },
     defaultColumn,
     onColumnFiltersChange: setColumnFilters,
@@ -1088,7 +1136,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                     );
                   }
 
-                      else if (ele.name == "pdfProveedor") {
+                  else if (ele.name == "pdfProveedor") {
                     return (
                       <td>
                         <Input
@@ -1276,26 +1324,26 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
               table.getRowModel().rows.map((row, index) => {
                 console.log(row);
 
-                return  row.original.currentUser ?
+                return row.original.currentUser ?
 
-                     <PopOver row={row} content={row.original.currentUser}/>:
+                  <PopOver row={row} content={row.original.currentUser} /> :
                   <div key={row.id} className={`even:bg-blue-gray-50/50  table-row `} >
-                      {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <div key={cell.id} className="table-cell p-4">
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </div>
-                        );
-                      })}
+                    {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
+                    {row.getVisibleCells().map((cell) => {
+                      return (
+                        <div key={cell.id} className="table-cell p-4">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </div>
+                      );
+                    })}
 
-                    </div>
+                  </div>
 
-                    
-                
+
+
               })
             )}
           </div>
