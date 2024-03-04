@@ -1,6 +1,8 @@
 import React from "react"
+import { Input } from "@material-tailwind/react";
+import type { InputProps } from "@material-tailwind/react";
 
-// A debounced input react component
+// A debounced input react componen
 function DebouncedInput({
   value: initialValue,
   onChange,
@@ -26,8 +28,19 @@ function DebouncedInput({
   }, [value])
 
   return (
-    <input {...props} value={value} onChange={e => setValue(e.target.value)} />
+      <div className="w-72 absolute top-10 bg-white rounded-lg">
+        <Input
+              value={value}
+              onChange={e => setValue(e.target.value)}
+              //className={'p-2 font-lg shadow rounded-lg w-1/5 h-14 absolute top-10'}
+              label="Busqueda"
+        />
+      </div>
   )
+
+  // return (
+  //   <input {...props} value={value} onChange={e => setValue(e.target.value)} />
+  // )
 }
 
 export default DebouncedInput

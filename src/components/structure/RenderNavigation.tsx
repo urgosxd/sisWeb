@@ -10,27 +10,22 @@ import {
   TabPanel,
   Typography,
 } from "@material-tailwind/react";
-import {UserIcon} from '@heroicons/react/24/outline'
+import {UserCircleIcon} from '@heroicons/react/24/outline'
 import Home from "../pages/Initial";
 import { Login } from "../pages/Login"
 
 export const RenderInfo = () => {
   const { user } = AuthData() as AuthProviderType;
   return (
-    <div>
-      PDS VIAJES REGISTRO
-      <div>
-
-        <UserIcon className="w-6 inline-block"/>
-          {user.name}
-        <Typography variant="h2" color="red">
-      {user.role}
-        </Typography>
+      <div className={"flex flex-row w-1/6 justify-center items-center"}>
+          <p className="text-white text-xl">{user.name}</p>
+          <UserCircleIcon className="w-[32px]  mr-8 inline-block text-white "/>
+          <Typography className={"text-xl"} color="white">
+            {user.role}
+          </Typography>
       </div>
-    </div>
   );
 };
-
 export const InitialRoute =() =>{
 
   return(
@@ -41,10 +36,8 @@ export const InitialRoute =() =>{
   )
 
 }
-
 export const RenderRoutes = () => {
   const { user } = AuthData() as AuthProviderType;
-
   return (
     <Routes>
       {nav.map((r, i) => {
@@ -57,7 +50,6 @@ export const RenderRoutes = () => {
     </Routes>
   );
 };
-
 export const RenderMenu = () => {
   const { user, logout } = AuthData() as AuthProviderType;
 
@@ -72,7 +64,7 @@ export const RenderMenu = () => {
   };
   return (
     <>
-      
+
         {nav.map((r, i) => {
           if (user.isAuthenticated && r.isMenu) {
             return (
@@ -90,9 +82,6 @@ export const RenderMenu = () => {
 export const RenderLogout = () => {
   const { user,logout } = AuthData() as AuthProviderType;
   return (
-    <div>
       <button onClick={()=>logout()}>Logout</button>
-    </div>
   );
 };
-

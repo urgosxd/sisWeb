@@ -5,6 +5,7 @@ import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { RenderInfo } from "../structure/RenderNavigation";
 import { createBoleto, createHotel, createRest, deleteBoleto, deleteHotel, deleteRest, updateBoleto, updateHotel, updateRest } from "../lib/api";
+import Title from "../compo/title/Title.tsx";
 
 export const Boleto = () => {
   // const notification = useSWR(
@@ -39,9 +40,9 @@ export const Boleto = () => {
   ]
 
   return (
-    <div>
-      <Typography>
-        BOLETOS
+    <div className={"mt-10 ml-10"}>
+      <Typography >
+        <Title title={"BOLETOS"} />
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />

@@ -5,6 +5,7 @@ import {
   RenderMenu,
   RenderRoutes,
 } from "../components/structure/RenderNavigation";
+
 import { AuthProviderType } from "../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,12 +24,12 @@ const AuthContext = createContext<null | AuthProviderType>(null);
 export const AuthData = () => useContext(AuthContext);
 
 export const AuthWrapper = () => {
-  let [authTokens, setAuthTokens] = useState(
+  const [authTokens, setAuthTokens] = useState(
     localStorage.getItem("authTokens")
       ? JSON.parse(localStorage.getItem("authTokens")!!)
       : null
   );
-  let [user, setUser] = useState(() =>
+  const [user, setUser] = useState(() =>
     localStorage.getItem("authTokens")
       ? {
           name: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
@@ -44,9 +45,9 @@ export const AuthWrapper = () => {
   // const router = useNavigate()
   const navigate = useNavigate();
 
-  let loginUser = async (e: any) => {
+  const loginUser = async (e: any) => {
     e.preventDefault();
-    let response = await fetch(BASEURL + "apiAuth/login/", {
+    const response = await fetch(BASEURL + "apiAuth/login/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export const AuthWrapper = () => {
         password: e.target.password.value,
       }),
     });
-    let data = await response.json();
+    const data = await response.json();
 
     if (response.status === 200) {
       setAuthTokens(data);
@@ -72,17 +73,17 @@ export const AuthWrapper = () => {
     }
   };
 
-  let logoutUser = () => {
+  const logoutUser = () => {
     setAuthTokens(null);
-    setUser({ ...user!!, isAuthenticated: false });
+    setUser({ ...user!, isAuthenticated: false });
     localStorage.removeItem("authTokens");
     navigate("/login");
     // router("/login")
     // history.push('/login')
   };
 
-  let updateToken = async () => {
-    let response = await fetch(BASEURL + "apiAuth/tokken/refresh/", {
+  const updateToken = async () => {
+    const response = await fetch(BASEURL + "apiAuth/tokken/refresh/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +91,7 @@ export const AuthWrapper = () => {
       body: JSON.stringify({ refresh: authTokens?.refresh }),
     });
 
-    let data = await response.json();
+    const data = await response.json();
 
     if (response.status === 200) {
       setAuthTokens(data);
@@ -105,7 +106,7 @@ export const AuthWrapper = () => {
     }
   };
 
-  let contextData = {
+  const contextData = {
     user: user!,
     authTokens: authTokens,
     login: loginUser,
@@ -116,9 +117,9 @@ export const AuthWrapper = () => {
 
   useEffect(() => {
 
-    let fourMinutes = 1000 * 60 * 4;
+    const fourMinutes = 1000 * 60 * 4;
 
-    let interval = setInterval(() => {
+    const interval = setInterval(() => {
       if (authTokens) {
         updateToken();
       }

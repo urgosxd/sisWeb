@@ -1,22 +1,31 @@
 import useSWR from "swr";
-import { ToastContainer, toast } from 'react-toastify';
-import { useEffect, useRef } from "react";
+import { ToastContainer, toast} from 'react-toastify';
+import React, {useEffect} from "react";
 import 'react-toastify/dist/ReactToastify.css';
-import { Typography } from "@material-tailwind/react";
+import {Spinner, Typography} from "@material-tailwind/react";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => res.json().catch(e=> {
+  throw new Error(e)
+}));
 
 function NotificationToast() {
-  const { data, error, isLoading } = useSWR(
-    // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
-    `${import.meta.env.VITE_URL_BACK}/apiCrud/notification/notification/`,
-    fetcher,{ refreshInterval: 25 }
-    // fetcher
+  const {data, error, isLoading} = useSWR(
+      // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
+      `${import.meta.env.VITE_URL_BACK}/apiCrud/notification/notification/`,
+      fetcher,
+      {refreshInterval: 25}
   );
-  const prevData = useRef(undefined)
 
-  const comp = <div className="flex flex-col"><Typography variant="h4">Ultima Accion</Typography> <Typography>{data && data.message}</Typography></div>
-  useEffect(()=>{
+  const Comp = <div className="flex flex-col"><Typography variant="h4" children={"Ultima Accion"} placeholder={"Ultima Accion"}/>
+                                                          <Typography children={data && data.message} placeholder={"mensaje"}/></div>
+
+  const CompError = (error:string)=> <div className="flex flex-col"><Typography variant="h4" children={"Error"} placeholder={"Error"}/>
+                                                                    <Typography children={error} placeholder={"error"}/></div>
+
+  const notify = (comp: React.JSX.Element) => toast(comp);
+
+  useEffect(() => {
+
     //   prevData.current = data
     // console.log("GIII");
     // console.log(prevData.current);
@@ -31,17 +40,26 @@ function NotificationToast() {
     //   notify()
     //   }
     // }
-    if(!data){
-      return
+
+
+    // if(error){
+    //   notify(CompError)
+    // }
+    // else {
+    //   notify(Comp)
+    // }
+
+    if(error){
+     notify(CompError(error.toString()));
     }
-    notify()
+  },[data, Comp, CompError, error])
 
-  },[data])
 
-  const notify = () => toast(comp);
   return(
-    <ToastContainer />
- ) 
+      <>
+        {isLoading && <Spinner/>}
+        <ToastContainer />
+      </>
+ )
 }
-
 export default NotificationToast

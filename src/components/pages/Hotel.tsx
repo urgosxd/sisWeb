@@ -6,6 +6,7 @@ import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { RenderInfo } from "../structure/RenderNavigation";
 import { createHotel, deleteHotel, updateHotel } from "../lib/api";
+import Title from "../compo/title/Title.tsx";
 
 export const Hotel = () => {
   // const notification = useSWR(
@@ -45,9 +46,9 @@ export const Hotel = () => {
 
 
   return (
-    <div> 
+    <div className={"mt-10 ml-10"}>
         <Typography>
-        HOTELES
+            <Title title={"HOTELES"} />
         </Typography>
       <NotificationToast/>
       <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false:true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/hoteles/hotel/`} methods={{create:createHotel,update:updateHotel,delete:deleteHotel}} />

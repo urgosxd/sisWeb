@@ -69,7 +69,6 @@ declare module "@tanstack/table-core" {
 }
 
 
-
 // type TourType = {
 //   id: number;
 //   ciudad: string;
@@ -693,8 +692,7 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
         <DebouncedInput
           value={globalFilter ?? ""}
           onChange={(value) => setGlobalFilter(String(value))}
-          className="p-2 font-lg shadow border border-block"
-          placeholder="Search all columns..."
+          placeholder="Búsqueda..."
         />
       </div>
       <Card className="h-full w-full overflow-scroll">
@@ -806,7 +804,6 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
                     />
                   )}
                 </td>
-
               }
             </tr>
             {/* { permission && isCreating && ( */}
@@ -1029,7 +1026,6 @@ function replaceArray(originalArray:boolean[], newArray:boolean[]) {
       <button className="fixed bottom-8 right-5 rounded-full w-28 flex justify-center items-center  h-28 border border-blue-gray-400" onClick={() => setIsCreating((prev) => !prev)}>
         <PlusIcon color="red" className="w-20" />
       </button>
-
       <ToastContainer />
     </div>
   );
