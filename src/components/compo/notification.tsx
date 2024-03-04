@@ -13,7 +13,8 @@ function NotificationToast() {
   const { data, error, isLoading } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     `${import.meta.env.VITE_URL_BACK}/apiCrud/notification/notification/`,
-    fetcher   // fetcher
+    fetcher,
+    {refreshInterval:1000}
 
   );
 
