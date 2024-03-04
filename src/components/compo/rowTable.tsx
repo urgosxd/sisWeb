@@ -114,7 +114,7 @@ declare module "@tanstack/react-table" {
 //       tableMeta?.setEdites((el) => el.map((ele, idx) => (idx == row.index ? !ele : false)))
 //     }
 const traducciones: { [key: string]: string } = {
-  ninio: "Niño",
+  // ninio: "Niño",
   anio: "Año",
   excursion: "Excursión",
   provedor: "Proveedor",
@@ -125,6 +125,17 @@ const traducciones: { [key: string]: string } = {
   direccion: "Dirección",
   menu: "Menú",
   vehiculo: "Vehículo",
+  pulle:"Pull",
+  pullp:"Pull",
+  privadop:"Privado",
+  privadoe:"Privado",
+  adultoe:"Adulto",
+  adultop:"Adulto",
+  ninioe:"Niño",
+  niniop:"Niño",
+  infantep:"Infante",
+  infantee:"Infante",
+
 
   // Agrega más traducciones según sea necesario
 };
