@@ -82,7 +82,7 @@ export const AuthWrapper = () => {
         role: data.user.role,
         id: data.user.id
       });
-      navigate("/tour");
+      navigate("/tours");
     } else {
       alert("Something went wrong!");
     }
@@ -124,6 +124,11 @@ export const AuthWrapper = () => {
 
     if (response.status === 200) {
       localStorage.setItem("authTokens", JSON.stringify({ access: data.access, refresh: data.refresh, user: luser }));
+      lSetUser({username: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
+      role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
+      id: JSON.parse(localStorage.getItem("authTokens")!!).user.id,
+      password: JSON.parse(localStorage.getItem("authTokens")!!).user.password}
+)
       setAuthTokens({ access: data.access, refresh: data.refresh,user: luser });
       setUser({
         name: data.user.name,

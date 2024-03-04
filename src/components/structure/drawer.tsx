@@ -22,15 +22,15 @@ import {NavbarSimple} from "../compo/SimpleNavBar.tsx";
 // import Link from 'next/link'
 const NamesNavbar2URL:{[key:string]:string} = {
   "Cambio":"/cambio",
-  "TOURS":"/tour",
-  "HOTELES":"/hotel",
-  "RESTAURANTES": "/restaurante",
-  "BOLETOS": "/boleto",
-  "TRASLADOS": "/traslado",
-  "TRENES": "/tren",
-  "TRANSPORTES": "/transporte",
-  "UPSELLINGS": "/upselling",
-  "GUIADOS": "/guiado",
+  "TOURS":"/tours",
+  "HOTELES":"/hoteles",
+  "RESTAURANTES": "/restaurantes",
+  "BOLETOS": "/boletos",
+  "TRASLADOS": "/traslados",
+  "TRENES": "/trenes",
+  "TRANSPORTES": "/transportes",
+  "UPSELLINGS": "/upsellings",
+  "GUIADOS": "/guiados",
   "Account": "/account",
 }
 
@@ -64,11 +64,11 @@ export function NavigationDash({children}:{children:React.ReactNode}) {
       {logo:<CalendarIcon className="w-5 text-white"/>,name:"GUIADOS"}]
 
   const navNames = navNameICon.map(ele=>ele.name)
-  const [idxNav, setIdxNav] = useState<number>(navNames.indexOf(currentSlug[0])+1)
+  const [idxNav, setIdxNav] = useState<number>(navNames.indexOf( currentSlug[0].toUpperCase()))
   
 const variants: Variants = {
     visible: (custom: number) => ({
-      translateY: custom * 47.5
+      translateY: custom * 55
     })
   }
 

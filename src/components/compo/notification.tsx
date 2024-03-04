@@ -18,13 +18,14 @@ function NotificationToast() {
 
   );
 
-  const Comp = <div className="flex flex-col"><Typography variant="h4" children={"Ultima Accion"} placeholder={"Ultima Accion"}/>
-                                                          <Typography children={data && data.message} placeholder={"mensaje"}/></div>
+  // const Comp = <div className="flex flex-col"><Typography variant="h4" children={"Ultima Accion"} placeholder={"Ultima Accion"}/>
+  //                                                         <Typography children={data && data.message} placeholder={"mensaje"}/></div>
 
-  const CompError = (error:string)=> <div className="flex flex-col"><Typography variant="h4" children={"Error"} placeholder={"Error"}/>
-                                                                    <Typography children={error} placeholder={"error"}/></div>
+  // const CompError = (error:string)=> <div className="flex flex-col"><Typography variant="h4" children={"Error"} placeholder={"Error"}/>
+  //                                                                   <Typography children={error} placeholder={"error"}/></div>
 
-  const notify = (comp: React.JSX.Element) => toast(comp);
+  // const notify = (comp: React.JSX.Element) => toast(comp);
+  const comp = <div className="flex flex-col"><Typography variant="h4">Ultima Accion</Typography> <Typography>{data && data.message}</Typography></div>
 
   useEffect(() => {
 
@@ -51,16 +52,16 @@ function NotificationToast() {
     //   notify(Comp)
     // }
 
-    if(error){
-     notify(CompError(error.toString()));
+if(!data){
+      return
     }
-  },[data, Comp, CompError, error])
+    notify()
+  },[data])
 
-
+ const notify = () => toast(comp);
   return(
       <>
-        {isLoading && <Spinner/>}
-        <ToastContainer />
+       <ToastContainer />
       </>
  )
 }
