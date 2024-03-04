@@ -39,6 +39,7 @@ export function NavbarSimple() {
                     className="mr-4 cursor-pointer py-1.5"
                 >
                     <img  className="h-16 w-full object-cover object-center" src={"/src/assets/pdslogo.svg"} />
+                    <Typography className={"font-roboto font-bold text-3xl"} children={"SISTEMA DE REGISTRO PDS VIAJES"} />
                 </Typography>
                 <NavList />
             </div>
