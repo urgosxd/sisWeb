@@ -17,7 +17,7 @@ import {
   PopoverHandler,
   PopoverContent,
   IconButton,
-  Badge
+  Badge,
 } from "@material-tailwind/react";
 import NotificationToast from "../compo/notification";
 import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
@@ -57,7 +57,7 @@ interface Props {
   permission: boolean;
   url: string;
   baseColumns: { name: string; extra: string; type: string }[];
-  user: any
+  user: any;
   methods: {
     create: any;
     update: any;
@@ -105,9 +105,9 @@ declare module "@tanstack/react-table" {
     setUploadTime: React.Dispatch<React.SetStateAction<boolean[]>>;
     uploadTimeDel: boolean[];
     setUploadTimeDel: React.Dispatch<React.SetStateAction<boolean[]>>;
-    currentID: number
-    setCurrentID: React.Dispatch<React.SetStateAction<number>>
-    updateData: (row: any) => any
+    currentID: number;
+    setCurrentID: React.Dispatch<React.SetStateAction<number>>;
+    updateData: (row: any) => any;
   }
 }
 // const aoeu =() => {
@@ -179,8 +179,8 @@ async function getCrud(url: string) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  }
-  return await fetchData({ url, options })
+  };
+  return await fetchData({ url, options });
 }
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // async function sendRequest(url:string, { arg }) {
@@ -191,9 +191,8 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 // }
 
 const ERROR_MSG = "Oops! Something went wrong";
-const fetchData = async function({ url, options }: FetchData): Promise<any> {
+const fetchData = async function ({ url, options }: FetchData): Promise<any> {
   const response = await fetch(url, options);
-
 
   if (!response.ok) {
     throw new Error(ERROR_MSG);
@@ -249,19 +248,19 @@ export async function updateCRUD(url: string, { arg }) {
 }
 
 function useSkipper() {
-  const shouldSkipRef = React.useRef(true)
-  const shouldSkip = shouldSkipRef.current
+  const shouldSkipRef = React.useRef(true);
+  const shouldSkip = shouldSkipRef.current;
 
   // Wrap a function with this to skip a pagination reset temporarily
   const skip = React.useCallback(() => {
-    shouldSkipRef.current = false
-  }, [])
+    shouldSkipRef.current = false;
+  }, []);
 
   React.useEffect(() => {
-    shouldSkipRef.current = true
-  })
+    shouldSkipRef.current = true;
+  });
 
-  return [shouldSkip, skip] as const
+  return [shouldSkip, skip] as const;
 }
 export async function updateCRUDUSER(url: string, { arg }) {
   console.log(localStorage.getItem("authTokens"));
@@ -285,10 +284,10 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
 
   const notify = (message: string) => toast(message);
   // const { mutate } = useSWRConfig()
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
     url,
-    getCrud,
+    getCrud
     // { refreshInterval: 100 }
     // fetcher
   );
@@ -300,22 +299,16 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     updateCRUD
   );
 
-
-
   const { error: ee3, trigger: triggerUpdateUser } = useSWRMutation(
     url,
     updateCRUDUSER
   );
-
-
-
 
   const { error: ee4, trigger: triggerDelete } = useSWRMutation(
     url,
     deleteCRUD
   );
   const [ErrFecth, setErrFetch] = useState(false);
-  console.log(data || 0);
   const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
     const itemRank = rankItem(row.getValue(columnId), value);
@@ -349,9 +342,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
 
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const [currentID, setCurrentID] = React.useState(
-    0
-  );
+  const [currentID, setCurrentID] = React.useState(0);
   const Add = async () => {
     const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
     if (currentID !== 0) {
@@ -380,9 +371,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     Array.from(data || [], (_) => false)
   );
 
-
-
-  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper()
+  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [createUpload, setCreateUpload] = useState(false);
 
   const fileTypes = ["PDF"];
@@ -523,16 +512,16 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     const nextFile =
       file.length - 1 <= index
         ? file.concat(
-          Array.from(Array(index - (file.length - 1)), () => undefined).map(
-            (el, idx) => {
-              if (idx == index - (file.length - 1) - 1) {
-                return newFile;
-              } else {
-                return el;
+            Array.from(Array(index - (file.length - 1)), () => undefined).map(
+              (el, idx) => {
+                if (idx == index - (file.length - 1) - 1) {
+                  return newFile;
+                } else {
+                  return el;
+                }
               }
-            }
+            )
           )
-        )
         : [...file.slice(0, insertAt), newFile, ...file.slice(insertAt)];
     setFile(nextFile);
   };
@@ -544,20 +533,18 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     notify("Error");
   }, [ErrFecth]);
 
-
-  const lastCurrent = useRef<number>()
+  const lastCurrent = useRef<number>();
 
   useEffect(() => {
-    lastCurrent.current = currentID
+    lastCurrent.current = currentID;
 
-    console.log(lastCurrent.current)
-
-  }, [currentID])
+    console.log(lastCurrent.current);
+  }, [currentID]);
   const cleanID = async () => {
     const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-    console.log("entro")
+    console.log("entro");
     if (lastCurrent.current !== 0) {
-      console.log(currentID)
+      console.log(currentID);
       const options: RequestInit = {
         method: "PUT",
         body: JSON.stringify("None"),
@@ -569,20 +556,19 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       };
 
       await fetchData({ url: url + `clean/${lastCurrent.current}/`, options });
-
     }
-  }
+  };
 
   useEffect(() => {
-    console.log("MONTADOOO")
+    console.log("MONTADOOO");
     // cleanID()
-    window.addEventListener('beforeunload', cleanID)
+    window.addEventListener("beforeunload", cleanID);
     return () => {
-      console.log("GAA")
-      cleanID()
-      window.removeEventListener('beforeunload', cleanID)
-    }
-  }, [currentID])
+      console.log("GAA");
+      cleanID();
+      window.removeEventListener("beforeunload", cleanID);
+    };
+  }, []);
 
   const myForm = useRef<HTMLFormElement | null>(null);
 
@@ -646,7 +632,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     try {
       // const respuesta = await methods.create(formData);
       const respuesta = await triggerCreate(formData);
-      setCurrentID(prev => respuesta.id);
+      setCurrentID((prev) => respuesta.id);
       localStorage.setItem("currentID", respuesta.id);
       setIsCreating((prev) => false);
       setCreateUpload((prev) => false);
@@ -732,8 +718,10 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       id: "action",
       cell: ({ getValue, row, column: { id }, table }) => {
         const Editable = async () => {
-          const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-          if (table.options.meta?.currentID !== 0) {
+          const cleanIdUp = async (url: string) => {
+            const token = JSON.parse(
+              localStorage.getItem("authTokens")!!
+            ).access;
             const options: RequestInit = {
               method: "PUT",
               body: JSON.stringify("None"),
@@ -743,19 +731,37 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                 Authorization: `Bearer ${token}`,
               },
             };
-            await fetchData({ url: url + `clean/${table.options.meta?.currentID}/`, options });
+            await fetchData({
+              url: url + `clean/${table.options.meta?.currentID}/`,
+              options,
+            });
             // setCurrentId(prev=>"")
             // localStorage.setItem("currentID","")
-            console.log("GESSS")
+          };
+
+          if (table.options.meta?.currentID !== 0) {
+            await cleanIdUp(url);
+            console.log("1");
+            // await  mutate(url,cleanIdUp(url))
           }
           // const resp = await triggerUpdateUser({ data: user.id, id: row.original.id  },{optimisticData:[...data,{...row.original,currentUser:user.id}]})
-          table.options.meta?.updateData(row, table.options.meta?.setEdites,triggerUpdateUser)
-          table.options.meta?.setCurrentID((ele) => row.original.id)
-          // localStorage.setItem("currentID", row.original.id)
-          table.options.meta?.setEdites((el) =>
-            el.map((ele, idx) => (idx == row.index ? true : false))
-          );
 
+          table.options.meta?.updateData(
+            row,
+            table.options.meta?.setEdites,
+            // mutate
+            triggerUpdateUser
+          );
+          // await triggerUpdateUser({ data: user.id, id: row.original.id }
+          // ,{optimisticData:dataa=> ([...dataa,{...row.original,currentUser:user.id}]),
+          // rollbackOnError:true} 
+          // table.options.meta?.setEdites((el) =>
+          //   el.map((ele, idx) => (idx == row.index ? true : false))
+          // );
+          // console.log("2");
+          table.options.meta?.setCurrentID((ele) => row.original.id);
+          
+          // localStorage.setItem("currentID", row.original.id)
         };
 
         const Cancel = () => {
@@ -801,12 +807,12 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
               id: row.original.id,
               data: formObj,
             });
-            table.options.meta?.setCurrentID(prev => respuesta.id);
+            table.options.meta?.setCurrentID((prev) => respuesta.id);
             localStorage.setItem("currentID", respuesta.id);
             setUploadTime((prev) => Array.from(data || [], (_) => false));
             setEdites((prev) => Array.from(data || [], (_) => false));
           } catch (error) {
-            console.log(error)
+            console.log(error);
             setErrFetch((prev) => true);
             setEdites((prev) => Array.from(data || [], (_) => false));
           }
@@ -829,16 +835,19 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           </div>
         ) : (
           <div>
-            {row.original.currentUser ?
-              row.original.currentUser !== user.id ? (<div></div>) : (<button onClick={Editable} name="edit">
-                ✐
-              </button>
+            {row.original.currentUser ? (
+              row.original.currentUser !== user.id ? (
+                <div></div>
+              ) : (
+                <button onClick={Editable} name="edit">
+                  ✐
+                </button>
               )
-              :
+            ) : (
               <button name="edit" onClick={Editable}>
                 ✐
               </button>
-            }
+            )}
           </div>
         );
       },
@@ -952,9 +961,6 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
     .concat(auxiliare);
   const columns = React.useMemo<ColumnDef<any, any>[]>(() => gaa, []);
 
-
-
-
   const table = useReactTable({
     data,
     columns,
@@ -976,49 +982,24 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       setUploadTimeDel,
       currentID,
       setCurrentID,
-      updateData: async (row, func,funn) => {
-        console.log("GAAAROWW")
-        skipAutoResetPageIndex()
-        // const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-        //   if (currId !== 0) {
-        //     const options: RequestInit = {
-        //       method: "PUT",
-        //       body: JSON.stringify("None"),
-        //       headers: {
-        //         Accept: "application/json, text/plain",
-        //         "Content-Type": "application/json;charset=UTF-8",
-        //         Authorization: `Bearer ${token}`,
-        //       },
-        //     };
-        //     await fetchData({ url: url + `clean/${currId}/`, options });
-        //   }
-      //   await mutate(url, async () => {
-      //     const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
-      //     const options: RequestInit = {
-      //       method: "PUT",
-      //       body: JSON.stringify(user.id),
-      //       headers: {
-      //         Accept: "application/json, text/plain",
-      //         "Content-Type": "application/json;charset=UTF-8",
-      //         Authorization: `Bearer ${token}`,
-      //       },
-      //     }
-      //     return await fetchData({ url: url + `clean/${row.original.id}/`, options });
-      //   }
-      //     , {
-      //       populateCache: (updated, table) => {
-      //         const filtered = table.filter(rowF => rowF.id !== row.original.id)
-      //         return [...filtered, updated]
-      //       },
-      //       revalidate: false
-      //     }
-      //   )
-        await funn({ data: user.id, id: row.original.id  }/* ,{optimisticData:[...data,{...row.original,currentUser:user.id}]} */)
-        skipAutoResetPageIndex()
+      updateData: async (row, func, funn) => {
+        console.log("GAAAROWW");
+        skipAutoResetPageIndex();
+        await funn(
+          { data: user.id, id: row.original.id }
+          ,{optimisticData:dataa=> ([...dataa,{...row.original,currentUser:user.id}]),
+          rollbackOnError:true} 
+        );
+        skipAutoResetPageIndex();
+        // await funn(
+        //   url,
+        //   updateCRUDUSER(url, { arg: { data: user.id, id: row.original.id } })
+        // );
+        // skipAutoResetPageIndex();
         // func((el) =>
         //   el.map((ele, idx) => (idx == row.index ? true : false))
         // )
-      //   // await triggerUpdateUser({ data: user.id, id: row.original.id  })
+        //   // await triggerUpdateUser({ data: user.id, id: row.original.id  })
       },
     },
     defaultColumn,
@@ -1053,42 +1034,42 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
             {isLoading
               ? "aoe"
               : table.getHeaderGroups().map((headerGroup) => (
-                <div key={headerGroup.id} className="table-row">
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <div
-                        key={header.id}
-                        // colSpan={header.colSpan}
-                        className="table-cell border-b border-blue-gray-100 bg-blue-gray-50 p-4"
-                      >
-                        {header.isPlaceholder ? null : (
-                          <HeaderTable header={header} table={table}>
-                            <div
-                              {...{
-                                className: header.column.getCanSort()
-                                  ? "cursor-pointer select-none"
-                                  : "",
-                                onClick:
-                                  header.column.getToggleSortingHandler(),
-                              }}
-                            >
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                              {{
-                                asc: " 🔼",
-                                desc: " 🔽",
-                              }[header.column.getIsSorted() as string] ??
-                                null}
-                            </div>
-                          </HeaderTable>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+                  <div key={headerGroup.id} className="table-row">
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <div
+                          key={header.id}
+                          // colSpan={header.colSpan}
+                          className="table-cell border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                        >
+                          {header.isPlaceholder ? null : (
+                            <HeaderTable header={header} table={table}>
+                              <div
+                                {...{
+                                  className: header.column.getCanSort()
+                                    ? "cursor-pointer select-none"
+                                    : "",
+                                  onClick:
+                                    header.column.getToggleSortingHandler(),
+                                }}
+                              >
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                                {{
+                                  asc: " 🔼",
+                                  desc: " 🔽",
+                                }[header.column.getIsSorted() as string] ??
+                                  null}
+                              </div>
+                            </HeaderTable>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
           </div>
           <div className="table-row-group">
             {<form id="CreateForm" onSubmit={createForm}></form>}
@@ -1134,9 +1115,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                         />
                       </td>
                     );
-                  }
-
-                  else if (ele.name == "pdfProveedor") {
+                  } else if (ele.name == "pdfProveedor") {
                     return (
                       <td>
                         <Input
@@ -1322,12 +1301,13 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
               <Loader />
             ) : (
               table.getRowModel().rows.map((row, index) => {
-                console.log(row);
-
-                return row.original.currentUser ?
-
-                  <PopOver row={row} content={row.original.currentUser} /> :
-                  <div key={row.id} className={`even:bg-blue-gray-50/50  table-row `} >
+                return row.original.currentUser ? (
+                  <PopOver row={row} content={row.original.currentUser} />
+                ) : (
+                  <div
+                    key={row.id}
+                    className={`even:bg-blue-gray-50/50  table-row `}
+                  >
                     {/* {row.original.currentUser && <span className="w-2 absolute">{row.original.currentUser}</span>} */}
                     {row.getVisibleCells().map((cell) => {
                       return (
@@ -1339,11 +1319,8 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                         </div>
                       );
                     })}
-
                   </div>
-
-
-
+                );
               })
             )}
           </div>
