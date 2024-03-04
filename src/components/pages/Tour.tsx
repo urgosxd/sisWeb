@@ -56,7 +56,7 @@ export const Tour = () => {
   return (
     <div className={"mt-5 ml-10"}>
       <Typography>
-        <Title title={"TOURS"} />
+        <Title title={"TOURSSSSSSSSSSSSSSSSS"} />
       </Typography>
       <NotificationToast />
       <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
