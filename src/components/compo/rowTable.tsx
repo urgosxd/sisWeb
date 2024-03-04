@@ -755,9 +755,9 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           // await triggerUpdateUser({ data: user.id, id: row.original.id }
           // ,{optimisticData:dataa=> ([...dataa,{...row.original,currentUser:user.id}]),
           // rollbackOnError:true} 
-          // table.options.meta?.setEdites((el) =>
-          //   el.map((ele, idx) => (idx == row.index ? true : false))
-          // );
+          table.options.meta?.setEdites((el) =>
+            el.map((ele, idx) => (idx == row.index ? true : false))
+          );
           // console.log("2");
           table.options.meta?.setCurrentID((ele) => row.original.id);
           
