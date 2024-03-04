@@ -31,12 +31,20 @@ export const Guiado = () => {
     {name:"servicio",extra:"none",type: "text"},
     {name:"idioma",extra:"none",type: "text"},
     {name:"detalle",extra:"large",type: "text"},
-    {name:"ptapull",extra:"dolar",type: "number"},
-    {name:"ptbpull",extra:"dolar",type:"number"},
-    {name:"ptapriv",extra:"dolar",type:"number"},
-    {name:"ptbpriv",extra:"dolar",type:"number"},
+    {name:"precioPullp",extra:"sol",type: "number"},
+    {name:"precioPulle",extra:"dolar",type: "number"},
+    {name:"precioPrivadop",extra:"sol",type: "number"},
+    {name:"precioPrivadoe",extra:"dolar",type: "number"},
   ]
-
+const baseColumnsV = [
+    {name:"servicio",extra:"none",type: "text"},
+    {name:"idioma",extra:"none",type: "text"},
+    {name:"detalle",extra:"large",type: "text"},
+    {name:"precioPullp",extra:"sol",type: "number"},
+    {name:"precioPulle",extra:"dolar",type: "number"},
+    {name:"precioPrivadop",extra:"sol",type: "number"},
+    {name:"precioPrivadoe",extra:"dolar",type: "number"},
+  ]
   return (
     <div className={"mt-10 ml-10"}>
       <Typography>
@@ -44,7 +52,7 @@ export const Guiado = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/guiados/guiado/`} methods={{ create: createGuiado, update: updateGuiado, delete: deleteGuiado }} />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV}  user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/guiados/guiado/`} methods={{ create: createGuiado, update: updateGuiado, delete: deleteGuiado }} />
     </div>
   );
 }

@@ -36,8 +36,8 @@ export const Login = () => {
         <form id="LOGINFORM" onSubmit={login}>
           {/* <Input label="Email" size="lg" /> */}
           {/* <Input label="Password" size="lg" /> */}
-          <Input type="text" label="usuario" size="lg" name="username" placeholder="Enter Username" />
-          <Input type="password" label="constrasenia" size="lg" name="password" placeholder="Enter Password" />
+          <Input type="text" label="Usuario" size="lg" name="username" placeholder="Enter Username" />
+          <Input type="password" label="Constraseña" size="lg" name="password" placeholder="Enter Password" />
 
         </form>
       </CardBody>

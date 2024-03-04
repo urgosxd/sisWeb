@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-    InitialRoute,
-    RenderInfo,
+  InitialRoute,
+  RenderInfo,
   RenderMenu,
   RenderRoutes,
 } from "../components/structure/RenderNavigation";
@@ -29,17 +29,31 @@ export const AuthWrapper = () => {
       ? JSON.parse(localStorage.getItem("authTokens")!!)
       : null
   );
-  const [user, setUser] = useState(() =>
+
+
+  const [luser, lSetUser] = useState(() => 
+    localStorage.getItem("authTokens") ?{
+      username: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
+      role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
+      id: JSON.parse(localStorage.getItem("authTokens")!!).user.id,
+      password: JSON.parse(localStorage.getItem("authTokens")!!).user.password}
+      :null
+
+  )
+  let [user, setUser] = useState(() =>
+
+
     localStorage.getItem("authTokens")
       ? {
-          name: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
-          role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
-          isAuthenticated: true,
-        }
-      : { name: "", isAuthenticated: false, role: "" }
+        name: JSON.parse(localStorage.getItem("authTokens")!!).user.username,
+        role: JSON.parse(localStorage.getItem("authTokens")!!).user.role,
+        isAuthenticated: true,
+        id: JSON.parse(localStorage.getItem("authTokens")!!).user.id,
+      }
+      : { name: "", isAuthenticated: false, role: "", id: 0 }
   );
 
-  const [currencyRate,setCurrencyRate] = useState(1)
+  const [currencyRate, setCurrencyRate] = useState(1)
 
   // const history = useHistory()
   // const router = useNavigate()
@@ -60,13 +74,14 @@ export const AuthWrapper = () => {
     const data = await response.json();
 
     if (response.status === 200) {
+      localStorage.setItem("authTokens", JSON.stringify(data));
       setAuthTokens(data);
       setUser({
         name: data.user.username,
         isAuthenticated: true,
         role: data.user.role,
+        id: data.user.id
       });
-      localStorage.setItem("authTokens", JSON.stringify(data));
       navigate("/tour");
     } else {
       alert("Something went wrong!");
@@ -77,10 +92,24 @@ export const AuthWrapper = () => {
     setAuthTokens(null);
     setUser({ ...user!, isAuthenticated: false });
     localStorage.removeItem("authTokens");
+    // const token = JSON.parse(localStorage.getItem("authTokens")!!).access;
+    //   const options: RequestInit = {
+    //     method: "PUT",
+    //     body: JSON.stringify("None"),
+    //     headers: {
+    //       Accept: "application/json, text/plain",
+    //       "Content-Type": "application/json;charset=UTF-8",
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   };
+    // await fetchData({ url: url + `clean/${localStorage.getItem("")}/`, options });
+    // setCurrentId(prev=>"")
+    // localStorage.setItem("currentID","")
     navigate("/login");
-    // router("/login")
-    // history.push('/login')
-  };
+  }
+  // router("/login")
+  // history.push('/login')
+  //
 
   const updateToken = async () => {
     const response = await fetch(BASEURL + "apiAuth/tokken/refresh/", {
@@ -94,13 +123,14 @@ export const AuthWrapper = () => {
     const data = await response.json();
 
     if (response.status === 200) {
-      setAuthTokens(data);
+      localStorage.setItem("authTokens", JSON.stringify({ access: data.access, refresh: data.refresh, user: luser }));
+      setAuthTokens({ access: data.access, refresh: data.refresh,user: luser });
       setUser({
         name: data.user.name,
         isAuthenticated: true,
         role: data.user.role,
+        id: data.user.id
       });
-      localStorage.setItem("authTokens", JSON.stringify(data));
     } else {
       logoutUser();
     }
@@ -111,13 +141,15 @@ export const AuthWrapper = () => {
     authTokens: authTokens,
     login: loginUser,
     logout: logoutUser,
-    currencyRate:currencyRate,
-    setCurrencyRate:setCurrencyRate
+    currencyRate: currencyRate,
+    setCurrencyRate: setCurrencyRate
   };
 
   useEffect(() => {
 
-    const fourMinutes = 1000 * 60 * 4;
+
+    let fourMinutes = 1000 * 60 * 3.5;
+
 
     const interval = setInterval(() => {
       if (authTokens) {
@@ -142,12 +174,12 @@ export const AuthWrapper = () => {
 
         {
           user.isAuthenticated ?
-        <NavigationDash>
-          <RenderRoutes/>
-        </NavigationDash>
-        : <InitialRoute/>
-          
-      }
+            <NavigationDash>
+              <RenderRoutes />
+            </NavigationDash>
+            : <InitialRoute />
+
+        }
       </>
     </AuthContext.Provider>
   );

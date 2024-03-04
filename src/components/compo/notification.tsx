@@ -9,11 +9,12 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json().catch(e=> {
 }));
 
 function NotificationToast() {
-  const {data, error, isLoading} = useSWR(
-      // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
-      `${import.meta.env.VITE_URL_BACK}/apiCrud/notification/notification/`,
-      fetcher,
-      {refreshInterval: 25}
+
+  const { data, error, isLoading } = useSWR(
+    // "https://siswebbackend.pdsviajes.com/apiCrud/tours/tour",
+    `${import.meta.env.VITE_URL_BACK}/apiCrud/notification/notification/`,
+    fetcher   // fetcher
+
   );
 
   const Comp = <div className="flex flex-col"><Typography variant="h4" children={"Ultima Accion"} placeholder={"Ultima Accion"}/>

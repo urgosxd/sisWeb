@@ -28,17 +28,25 @@ export const Boleto = () => {
   const baseColumns = [
     {name:"ciudad",extra:"none",type: "text"},
     {name:"servicio",extra:"none",type: "text"},
-    {name:"pppAdulto",extra:"sol",type:"number"},
-    {name:"ppeAdulto",extra:"dolar",type:"number"},
-    {name:"pppNinio",extra:"sol",type:"number"},
-    {name:"ppeNinio",extra:"dolar",type:"number"},
-    {name:"pppInfante",extra:"sol",type:"number"},
-    {name:"ppeInfante",extra:"dolar",type:"number"},
-    {name:"precioMenuE",extra:"dolar",type:"number"},
-    {name:"estudianteP",extra:"sol",type:"number"},
-    {name:"estudianteE",extra:"dolar",type:"number"},
+    {name:"adultop",extra:"sol",type:"number"},
+    {name:"adultoe",extra:"dolar",type:"number"},
+    {name:"niniop",extra:"sol",type:"number"},
+    {name:"ninioe",extra:"dolar",type:"number"},
+    {name:"infantep",extra:"sol",type:"number"},
+    {name:"infantee",extra:"dolar",type:"number"},
+    {name:"estudiantePeruano",extra:"sol",type:"number"},
+    {name:"estudianteExtranjero",extra:"dolar",type:"number"},
   ]
-
+const baseColumnsV = [
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"servicio",extra:"none",type: "text"},
+    {name:"adultop",extra:"sol",type:"number"},
+    {name:"adultoe",extra:"dolar",type:"number"},
+    {name:"niniop",extra:"sol",type:"number"},
+    {name:"ninioe",extra:"dolar",type:"number"},
+    {name:"infantep",extra:"sol",type:"number"},
+    {name:"infantee",extra:"dolar",type:"number"},
+  ]
   return (
     <div className={"mt-10 ml-10"}>
       <Typography >
@@ -46,7 +54,7 @@ export const Boleto = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/boletos/boleto/`} methods={{ create: createBoleto, update: updateBoleto, delete: deleteBoleto }} />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/boletos/boleto/`} methods={{ create: createBoleto, update: updateBoleto, delete: deleteBoleto }} />
     </div>
   );
 }

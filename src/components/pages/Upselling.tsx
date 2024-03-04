@@ -30,10 +30,19 @@ export const Upselling = () => {
   const baseColumns = [
     {name:"servicioProducto",extra:"none",type: "text"},
     {name:"detalle",extra:"large",type: "text"},
-    {name:"ppp",extra:"sol",type:"number"},
-    {name:"ppe",extra:"dolar",type:"number"},
+    {name:"pnp",extra:"sol",type:"number"},
+    {name:"pne",extra:"dolar",type:"number"},
+    {name:"pvp",extra:"sol",type:"number"},
+    {name:"pve",extra:"dolar",type:"number"},
   ]
-
+  const baseColumnsV = [
+    {name:"servicioProducto",extra:"none",type: "text"},
+    {name:"detalle",extra:"large",type: "text"},
+    {name:"pnp",extra:"sol",type:"number"},
+    {name:"pne",extra:"dolar",type:"number"},
+    {name:"pvp",extra:"sol",type:"number"},
+    {name:"pve",extra:"dolar",type:"number"},
+  ]
   return (
     <div className={"mt-10 ml-10"}>
       <Typography>
@@ -42,7 +51,7 @@ export const Upselling = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/upsellings/upselling/`} methods={{ create: createUps, update: updateUps, delete: deleteUps }} />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/upsellings/upselling/`} methods={{ create: createUps, update: updateUps, delete: deleteUps }} />
     </div>
   );
 }

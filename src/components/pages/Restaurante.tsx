@@ -27,18 +27,34 @@ export const Restaurante = () => {
   const baseColumns = [
     {name:"ciudad",extra:"none",type: "text"},
     {name:"nombre",extra:"none",type: "text"},
+    {name:"categoria",extra:"none",type: "text"},
     {name:"especialidad",extra:"none",type: "text"},
     {name:"tipoDeServicio",extra:"none",type: "text"},
     {name:"horarioDeAtencion",extra:"time",type: "text"},
     {name:"direccion",extra:"none",type:"text"},
     {name:"telefonoReserva",extra:"tel",type:"text"},
     {name:"telefonoRecepcion",extra:"tel",type:"text"},
+    {name:"precioCarta",extra:"sol",type:"number"},
     {name:"precioMenu",extra:"sol",type:"number"},
-    {name:"precioMenuE",extra:"dolar",type:"number"},
-    {name:"figma",extra:"none",type:"text"},
-    {name:"pdf",extra:"none",type:"file"},
+    { name: "fichaTecnica", extra: "link", type: "text" },
+    { name: "pdfProveedor", extra: "link", type: "text" },
   ]
 
+  const baseColumnsV = [
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"nombre",extra:"none",type: "text"},
+    {name:"categoria",extra:"none",type: "text"},
+    {name:"especialidad",extra:"none",type: "text"},
+    {name:"tipoDeServicio",extra:"none",type: "text"},
+    {name:"horarioDeAtencion",extra:"time",type: "text"},
+    {name:"direccion",extra:"none",type:"text"},
+    {name:"telefonoReserva",extra:"tel",type:"text"},
+    {name:"telefonoRecepcion",extra:"tel",type:"text"},
+    {name:"precioCarta",extra:"sol",type:"number"},
+    {name:"precioMenu",extra:"sol",type:"number"},
+    { name: "fichaTecnica", extra: "link", type: "text" },
+    // { name: "pdfProveedor", extra: "link", type: "text" },
+  ]
 
 
   return (
@@ -49,7 +65,7 @@ export const Restaurante = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={baseColumns} permission={user.role == "Ventas" ? false : true} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/restaurantes/restaurante/`} methods={{ create: createRest, update: updateRest, delete: deleteRest }} />
+      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/restaurantes/restaurante/`} methods={{ create: createRest, update: updateRest, delete: deleteRest }} />
     </div>
   );
 }
