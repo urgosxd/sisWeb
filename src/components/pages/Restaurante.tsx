@@ -6,6 +6,7 @@ import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { RenderInfo } from "../structure/RenderNavigation";
 import { createHotel, createRest, deleteHotel, deleteRest, updateHotel, updateRest } from "../lib/api";
+import Title from "../compo/title/Title.tsx";
 
 export const Restaurante = () => {
   // const notification = useSWR(
@@ -57,9 +58,10 @@ export const Restaurante = () => {
 
 
   return (
-    <div>
+    <div className={"mt-10 ml-10"}>
       <Typography>
-        RESTAURANTE
+        <Title title={"RESTAURANTE"} />
+
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />

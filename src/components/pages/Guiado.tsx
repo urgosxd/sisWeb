@@ -7,6 +7,7 @@ import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { RenderInfo } from "../structure/RenderNavigation";
 import { createBoleto, createGuiado, createHotel, createRest, createTraslado, createTren, createUps, deleteBoleto, deleteGuiado, deleteHotel, deleteRest, deleteTraslado, deleteTren, updateBoleto, updateGuiado, updateHotel, updateRest, updateTraslado, updateTren } from "../lib/api";
+import Title from "../compo/title/Title.tsx";
 
 export const Guiado = () => {
   // const notification = useSWR(
@@ -45,9 +46,9 @@ const baseColumnsV = [
     {name:"precioPrivadoe",extra:"dolar",type: "number"},
   ]
   return (
-    <div>
+    <div className={"mt-10 ml-10"}>
       <Typography>
-        GUIADO
+        <Title title={"GUIADO"} />
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />

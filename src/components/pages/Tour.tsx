@@ -5,6 +5,7 @@ import { AuthData } from "../../provider/authProvider";
 import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { createTour, deleteTour, getFicha, updateTour } from "../lib/api";
+import Title from "../compo/title/Title.tsx"
 
 export const Tour = () => {
   // const notification = useSWR(
@@ -53,9 +54,9 @@ export const Tour = () => {
   console.log(import.meta.env.VITE_URL_BACK)
 
   return (
-    <div>
+    <div className={"mt-5 ml-10"}>
       <Typography>
-        TOURS
+        <Title title={"TOURS"} />
       </Typography>
       <NotificationToast />
       <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />

@@ -78,6 +78,7 @@ declare module "@tanstack/table-core" {
   }
 }
 
+
 // type TourType = {
 //   id: number;
 //   ciudad: string;
@@ -1035,8 +1036,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
         <DebouncedInput
           value={globalFilter ?? ""}
           onChange={(value) => setGlobalFilter(String(value))}
-          className="p-2 font-lg shadow border border-block"
-          placeholder="Search all columns..."
+          placeholder="Búsqueda..."
         />
       </div>
       <Card className="h-full w-full overflow-scroll">
@@ -1180,8 +1180,10 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
                     />
                   )}
                 </td>
+
               )}
             </div>
+
             {/* { permission && isCreating && ( */}
             {/*   <tr> */}
             {/*     <td className={"p-4 border-b border-blue-gray-50"}> */}
@@ -1411,7 +1413,6 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       >
         <PlusIcon color="red" className="w-20" />
       </button>
-
       <ToastContainer />
     </div>
   );
