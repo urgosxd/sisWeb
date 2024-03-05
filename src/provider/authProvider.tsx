@@ -141,13 +141,16 @@ export const AuthWrapper = () => {
     }
   };
 
+  const [roleMode,setRoleMode] = useState("Operaciones")
   const contextData = {
     user: user!,
     authTokens: authTokens,
     login: loginUser,
     logout: logoutUser,
     currencyRate: currencyRate,
-    setCurrencyRate: setCurrencyRate
+    setCurrencyRate: setCurrencyRate,
+    roleMode,
+    setRoleMode
   };
 
   useEffect(() => {

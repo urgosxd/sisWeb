@@ -971,7 +971,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
       }
     })
     .concat(auxiliare);
-  const columns = React.useMemo<ColumnDef<any, any>[]>(() => gaa, []);
+  const columns = React.useMemo<ColumnDef<any, any>[]>(() => gaa, [baseColumns]);
 
   const table = useReactTable({
     data,
