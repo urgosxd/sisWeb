@@ -94,6 +94,7 @@ export function NavigationDash({ children }: { children: React.ReactNode }) {
         <div className="z-10">
           <Radio name="rol" label="Operaciones" value="Operaciones" checked={roleMode == "Operaciones"} onChange={changeRoleMode} />
           <Radio name="rol" label="Ventas" value="Ventas" checked={roleMode == "Ventas"} onChange={changeRoleMode}/>
+          <Radio name="rol" label="Admin" value="Administrator" checked={roleMode == "Administrator"} onChange={changeRoleMode}/>
         </div> 
       }
 

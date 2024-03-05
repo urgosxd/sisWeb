@@ -17,8 +17,8 @@ export const Traslado = () => {
   // );
 
 
-  const { user, currencyRate } = AuthData() as AuthProviderType
 
+  const { user, roleMode } = AuthData() as AuthProviderType
   if (!user.isAuthenticated) {
     const ga = useNavigate()
     ga("/login")
@@ -32,13 +32,31 @@ export const Traslado = () => {
     {name:"tipoDeVehiculo",extra:"none",type: "text"},
     {name:"precio",extra:"sol",type:"number"},
   ]
-
+const baseColumnsO = [
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"servicio",extra:"none",type: "text"},
+    {name:"tipoDeVehiculo",extra:"none",type: "text"},
+    {name:"precio",extra:"sol",type:"number"},
+  ]
   const baseColumnsV = [
     {name:"ciudad",extra:"none",type: "text"},
     {name:"servicio",extra:"none",type: "text"},
     // {name:"tipoDeVehiculo",extra:"none",type: "text"},
     {name:"precio",extra:"sol",type:"number"},
   ]
+
+const roles:{[key:string]:any} = {
+    "Operaciones":baseColumnsO,
+    "Ventas":baseColumnsV,
+    "Administrator":baseColumns
+  }
+
+  const permisos:{[key:string]:boolean} = {
+    "Operaciones":false,
+    "Ventas": false,
+    "Administrator":true
+  }
+
 
   return (
     <div className={"mt-[170px] ml-3"}>
@@ -48,7 +66,8 @@ export const Traslado = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/traslados/traslado/`} methods={{ create: createTraslado, update: updateTraslado, delete: deleteTraslado }} />
+      {/* <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/traslados/traslado/`} methods={{ create: createTraslado, update: updateTraslado, delete: deleteTraslado }} /> */}
+      <RowTable baseColumns={user.role == "Administrator" ? roles[roleMode] : roles[user.role]} user={user} permission={user.role == "Administrator" ? permisos[roleMode]: permisos[user.role]} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/traslados/traslado/`} />
     </div>
   );
 }

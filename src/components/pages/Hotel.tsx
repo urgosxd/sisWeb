@@ -17,7 +17,8 @@ export const Hotel = () => {
   // );
 
   
-    const {user,currencyRate} = AuthData() as AuthProviderType
+
+  const { user, roleMode } = AuthData() as AuthProviderType
 
   if(!user.isAuthenticated){
    const ga = useNavigate()
@@ -26,6 +27,25 @@ export const Hotel = () => {
 
 // ['id','ciudad','clase','nombre','categoria','telefono','telefonoRecepcion','simple','doble','triple','horarioDesayuno','checkIn','checkOut','figma','fichasTecnicas']
   const baseColumns = [ 
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"clase",extra:"none",type: "text"},
+    {name:"nombre",extra:"none",type: "text"},
+    {name:"categoria",extra:"none",type: "text"},
+    {name:"telefonoReserva",extra:"tel",type:"text"},
+    {name:"telefonoRecepcion",extra:"tel",type:"text"},
+    {name:"precioConfidencial",extra:"dolar",type:"number"},
+    {name:"simple",extra:"dolar",type:"number"},
+    {name:"doble",extra:"dolar",type:"number"},
+    {name:"triple",extra:"dolar",type:"number"},
+    {name:"horarioDesayunoInicio",extra:"time",type:"text"},
+    {name:"horarioDesayunoFinal",extra:"time",type:"text"},
+    {name:"checkIn",extra:"time",type:"text"},
+    {name:"checkOut",extra:"time",type:"text"},
+    { name: "recomendacionesImagen", extra: "link", type: "text" },
+    { name: "fichaTecnica", extra: "link", type: "text" },
+    { name: "pdfProveedor", extra: "link", type: "text" },
+  ]
+const baseColumnsO = [ 
     {name:"ciudad",extra:"none",type: "text"},
     {name:"clase",extra:"none",type: "text"},
     {name:"nombre",extra:"none",type: "text"},
@@ -62,6 +82,17 @@ const baseColumnsV = [
     {name:"checkOut",extra:"time",type:"text"},
     { name: "fichaTecnica", extra: "link", type: "text" },
   ]
+ const roles:{[key:string]:any} = {
+    "Operaciones":baseColumnsO,
+    "Ventas":baseColumnsV,
+    "Administrator":baseColumns
+  }
+
+  const permisos:{[key:string]:boolean} = {
+    "Operaciones":false,
+    "Ventas": false,
+    "Administrator":true
+  }
 
 
   return (
@@ -70,7 +101,9 @@ const baseColumnsV = [
             <Title title={"HOTELES"} />
         </Typography>
       <NotificationToast/>
-      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/hoteles/hotel/`} methods={{create:createHotel,update:updateHotel,delete:deleteHotel}} />
+      {/* <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/hoteles/hotel/`} methods={{create:createHotel,update:updateHotel,delete:deleteHotel}} /> */}
+      
+      <RowTable baseColumns={user.role == "Administrator" ? roles[roleMode] : roles[user.role]} user={user} permission={user.role == "Administrator" ? permisos[roleMode]: permisos[user.role]} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/hoteles/hotel/`} />
     </div>
   );
 }

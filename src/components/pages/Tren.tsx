@@ -17,8 +17,7 @@ export const Tren = () => {
   // );
 
 
-  const { user, currencyRate } = AuthData() as AuthProviderType
-
+  const { user, roleMode } = AuthData() as AuthProviderType
   if (!user.isAuthenticated) {
     const ga = useNavigate()
     ga("/login")
@@ -27,6 +26,15 @@ export const Tren = () => {
 
         // fields = ['id','ciudad','servicio','pppAdulto','ppeAdulto','pppNinio','ppeNinio','pppInfante','ppeInfante','estudinateP','estudianteE']
   const baseColumns = [
+    {name:"ciudad",extra:"none",type: "text"},
+    {name:"empresa",extra:"none",type: "text"},
+    {name:"ruta",extra:"none",type: "text"},
+    {name:"categoria",extra:"none",type: "text"},
+    {name:"adulto",extra:"dolar",type:"number"},
+    {name:"ninio",extra:"dolar",type:"number"},
+    {name:"infante",extra:"dolar",type:"number"},
+  ]
+  const baseColumnsO = [
     {name:"ciudad",extra:"none",type: "text"},
     {name:"empresa",extra:"none",type: "text"},
     {name:"ruta",extra:"none",type: "text"},
@@ -44,6 +52,20 @@ export const Tren = () => {
     {name:"ninio",extra:"dolar",type:"number"},
     {name:"infante",extra:"dolar",type:"number"},
   ]
+  
+const roles:{[key:string]:any} = {
+    "Operaciones":baseColumnsO,
+    "Ventas":baseColumnsV,
+    "Administrator":baseColumns
+  }
+
+  const permisos:{[key:string]:boolean} = {
+    "Operaciones":false,
+    "Ventas": false,
+    "Administrator":true
+  }
+
+
   return (
     <div className={"mt-[170px] ml-3"}>
       <Typography>
@@ -52,7 +74,8 @@ export const Tren = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/trenes/tren/`} methods={{ create: createTren, update: updateTren, delete: deleteTren }} />
+      {/* <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/trenes/tren/`} methods={{ create: createTren, update: updateTren, delete: deleteTren }} /> */}
+      <RowTable baseColumns={user.role == "Administrator" ? roles[roleMode] : roles[user.role]} user={user} permission={user.role == "Administrator" ? permisos[roleMode]: permisos[user.role]} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/trenes/tren/`} />
     </div>
   );
 }

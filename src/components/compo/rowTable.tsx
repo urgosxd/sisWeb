@@ -58,11 +58,11 @@ interface Props {
   url: string;
   baseColumns: { name: string; extra: string; type: string }[];
   user: any;
-  methods: {
-    create: any;
-    update: any;
-    delete: any;
-  };
+  // methods: {
+  //   create: any;
+  //   update: any;
+  //   delete: any;
+  // };
 }
 
 import { ToastContainer, toast } from "react-toastify";
@@ -288,7 +288,7 @@ export async function updateCRUDUSER(url: string, { arg }) {
   };
   return await fetchData({ url: url + `clean/${arg.id}/`, options });
 }
-function RowTable({ permission, user, url, baseColumns, methods }: Props) {
+function RowTable({ permission, user, url, baseColumns }: Props) {
   // function gaa(baseColumns:any){
   //  const names = baseColumns.map(ele=>ele.name)
   //  const values = ["","",jk]
