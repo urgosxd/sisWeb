@@ -84,6 +84,7 @@ export function NavigationDash({ children }: { children: React.ReactNode }) {
   }
 
   return (
+
     <div>
       <NavbarSimple />
       
@@ -95,6 +96,7 @@ export function NavigationDash({ children }: { children: React.ReactNode }) {
           <Radio name="rol" label="Ventas" value="Ventas" checked={roleMode == "Ventas"} onChange={changeRoleMode}/>
         </div> 
       }
+
 
           <div className={"flex justify-center mt-3"}>
             <Typography color={"white"} className={"font-bold"} children={"PDS DASHBOARD"} />

@@ -324,12 +324,10 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
   const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
     const itemRank = rankItem(row.getValue(columnId), value);
-
     // Store the itemRank info
     addMeta({
       itemRank,
     });
-
     // Return if the item should be filtered in/out
     return itemRank.passed;
   };
@@ -1039,7 +1037,7 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           placeholder="Búsqueda..."
         />
       </div>
-      <Card className="h-full w-full overflow-scroll">
+      <Card className="h-full w-full">
         <div className="table border-collapse w-full min-w-max table-auto text-left">
           <div className="table-header-group">
             {isLoading
@@ -1342,30 +1340,30 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
           <div className="mx-auto">
             <div className="flex items-center gap-2">
               <button
-                className="border rounded p-1"
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
+                  className="border rounded p-1"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
               >
                 {"<<"}
               </button>
               <button
-                className="border rounded p-1"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                  className="border rounded p-1"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
               >
                 {"<"}
               </button>
               <button
-                className="border rounded p-1"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                  className="border rounded p-1"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
               >
                 {">"}
               </button>
               <button
-                className="border rounded p-1"
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
+                  className="border rounded p-1"
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
               >
                 {">>"}
               </button>
@@ -1379,36 +1377,36 @@ function RowTable({ permission, user, url, baseColumns, methods }: Props) {
               <span className="flex items-center gap-1">
                 | Ir a la Pagina:
                 <input
-                  type="number"
-                  defaultValue={table.getState().pagination.pageIndex + 1}
-                  onChange={(e) => {
-                    const page = e.target.value
-                      ? Number(e.target.value) - 1
-                      : 0;
-                    table.setPageIndex(page);
-                  }}
-                  className="border p-1 rounded w-16"
+                    type="number"
+                    defaultValue={table.getState().pagination.pageIndex + 1}
+                    onChange={(e) => {
+                      const page = e.target.value
+                          ? Number(e.target.value) - 1
+                          : 0;
+                      table.setPageIndex(page);
+                    }}
+                    className="border p-1 rounded w-16"
                 />
               </span>
               <select
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                  table.setPageSize(Number(e.target.value));
-                }}
+                  value={table.getState().pagination.pageSize}
+                  onChange={(e) => {
+                    table.setPageSize(Number(e.target.value));
+                  }}
               >
                 {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <option key={pageSize} value={pageSize}>
-                    Show {pageSize}
-                  </option>
+                    <option key={pageSize} value={pageSize}>
+                      Mostrar {pageSize}
+                    </option>
                 ))}
               </select>
+              <div>{table.getPrePaginationRowModel().rows.length} Filas</div>
             </div>
-            <div>{table.getPrePaginationRowModel().rows.length} Rows</div>
           </div>
         )}
       </Card>
       <button
-        className="fixed bottom-8 right-5 rounded-full w-28 flex justify-center items-center  h-28 border border-blue-gray-400"
+          className="fixed bottom-8 right-5 rounded-full w-28 flex justify-center items-center  h-28 border border-blue-gray-400"
         onClick={async () => await Add()}
       >
         <PlusIcon color="red" className="w-20" />
