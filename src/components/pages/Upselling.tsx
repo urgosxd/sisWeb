@@ -18,7 +18,7 @@ export const Upselling = () => {
   // );
 
 
-  const { user, currencyRate } = AuthData() as AuthProviderType
+  const { user, roleMode } = AuthData() as AuthProviderType
 
   if (!user.isAuthenticated) {
     const ga = useNavigate()
@@ -28,6 +28,14 @@ export const Upselling = () => {
 
         // fields = ['id','ciudad','servicio','pppAdulto','ppeAdulto','pppNinio','ppeNinio','pppInfante','ppeInfante','estudinateP','estudianteE']
   const baseColumns = [
+    {name:"servicioProducto",extra:"none",type: "text"},
+    {name:"detalle",extra:"large",type: "text"},
+    {name:"pnp",extra:"sol",type:"number"},
+    {name:"pne",extra:"dolar",type:"number"},
+    {name:"pvp",extra:"sol",type:"number"},
+    {name:"pve",extra:"dolar",type:"number"},
+  ]
+  const baseColumnsO = [
     {name:"servicioProducto",extra:"none",type: "text"},
     {name:"detalle",extra:"large",type: "text"},
     {name:"pnp",extra:"sol",type:"number"},
@@ -51,7 +59,8 @@ export const Upselling = () => {
       </Typography>
       {/* <Input type={"number"} onChange={(e)=>setCurrencyRate(Number(e.target.value))}/> */}
       <NotificationToast />
-      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/upsellings/upselling/`} methods={{ create: createUps, update: updateUps, delete: deleteUps }} />
+      {/* <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/upsellings/upselling/`} methods={{ create: createUps, update: updateUps, delete: deleteUps }} /> */}
+      <RowTable baseColumns={user.role == "Administrator" ? roles[roleMode] : roles[user.role]} user={user} permission={user.role == "Administrator" ? permisos[roleMode]: permisos[user.role]} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/upsellings/upselling/`} />
     </div>
   );
 }

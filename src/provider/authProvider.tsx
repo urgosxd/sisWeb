@@ -141,21 +141,23 @@ export const AuthWrapper = () => {
     }
   };
 
+
+  const [roleMode,setRoleMode] = useState("Operaciones")
+
   const contextData = {
     user: user!,
     authTokens: authTokens,
     login: loginUser,
     logout: logoutUser,
     currencyRate: currencyRate,
-    setCurrencyRate: setCurrencyRate
+    setCurrencyRate: setCurrencyRate,
+    roleMode,
+    setRoleMode
   };
 
+
   useEffect(() => {
-
-
     let fourMinutes = 1000 * 60 * 3.5;
-
-
     const interval = setInterval(() => {
       if (authTokens) {
         updateToken();
@@ -163,6 +165,7 @@ export const AuthWrapper = () => {
     }, fourMinutes);
     return () => clearInterval(interval);
   }, [authTokens]);
+
 
   return (
     <AuthContext.Provider value={contextData}>
@@ -185,6 +188,7 @@ export const AuthWrapper = () => {
             : <InitialRoute />
 
         }
+
       </>
     </AuthContext.Provider>
   );

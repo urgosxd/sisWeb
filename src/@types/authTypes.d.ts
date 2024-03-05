@@ -6,6 +6,6 @@ export type AuthProviderType = {
     logout:()=>void
     currencyRate:number
     setCurrencyRate:React.Dispatch<React.SetStateAction<number>>
-
-
+    roleMode:string
+    setRoleMode:React.Dispatch<React.SetStateAction<string>>
 }
