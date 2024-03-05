@@ -6,6 +6,7 @@ import { AuthProviderType } from "../../@types/authTypes";
 import { useNavigate } from "react-router-dom";
 import { createTour, deleteTour, getFicha, updateTour } from "../lib/api";
 import Title from "../compo/title/Title.tsx"
+import { useEffect } from "react";
 
 export const Tour = () => {
   // const notification = useSWR(
@@ -16,13 +17,12 @@ export const Tour = () => {
   // );
 
 
-  const { user, currencyRate } = AuthData() as AuthProviderType
+  const { user, roleMode } = AuthData() as AuthProviderType
 
   if (!user.isAuthenticated) {
     const ga = useNavigate()
     ga("/login")
   }
-
 
   const baseColumns = [
     { name: "ciudad", extra: "none", type: "text" },
@@ -51,7 +51,25 @@ export const Tour = () => {
     { name: "fichaTecnica", extra: "link", type: "text" },
   ]
 
+
+  const roles:{[key:string]:any} = {
+    "Operaciones":baseColumns,
+    "Ventas":baseColumnsV,
+  }
+
+  const permisos:{[key:string]:boolean} = {
+    "Operaciones":false,
+    "Ventas": false
+  }
+
   console.log(import.meta.env.VITE_URL_BACK)
+  console.log(roleMode)
+  console.log(user.role)
+
+
+  // useEffect(()=>{
+  //   console.log("role Mod")
+  // },[roleMode])
 
   return (
     <div className={"mt-[170px] ml-3"}>
@@ -59,7 +77,7 @@ export const Tour = () => {
         <Title title={"TOURS"} />
       </Typography>
       <NotificationToast />
-      <RowTable baseColumns={user.role == "Operaciones" ? baseColumns : baseColumnsV} user={user} permission={user.role == "Operaciones" ? true : false} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
+      <RowTable baseColumns={user.role == "Administrator" ? roles[roleMode] : roles[user.role]} user={user} permission={permisos[user.role]} url={`${import.meta.env.VITE_URL_BACK}/apiCrud/tours/tour/`} methods={{ create: createTour, update: updateTour, delete: deleteTour }} />
     </div>
   );
 }
