@@ -73,12 +73,17 @@ const variants: Variants = {
   }
 
   return (
-    <div>
+    <div className={"w-[100vw]"}>
       {/* <MiniNavbar action={toggleDrawer}/> */}
       <NavbarSimple />
-
       <div className="flex flex-row">
-      <Drawer open={open} onClose={()=>{}} overlay={false} className="top-22 static bg-black flex-col items-center justify-center">
+      <Drawer
+          open={open}
+          onClose={()=>{}}
+          overlay={false}
+          // className="top-22 static bg-black flex-col items-center justify-center"
+          className="top-22 static bg-black mt-[150px] z-30  flex-col items-center justify-center"
+      >
 
         <div className={"flex justify-center mt-3"}>
             <Typography color={"white"} className={"font-bold"} children={"PDS DASHBOARD"} />

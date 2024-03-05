@@ -29,11 +29,17 @@ function DebouncedInput({
   }, [value])
 
   return (
-      <div className="w-72 absolute top-10 bg-white rounded-lg p-1 ">
+      <div className="w-52 absolute z-20 top-10 bg-white rounded-lg  ">
         <Input
+            variant={"outlined"}
+            color={"red"}
             value={value}
             onChange={e => setValue(e.target.value)}
-            label="Busqueda"
+            labelProps={{
+                className: "hidden",
+            }}
+            placeholder="Busqueda"
+
             // icon={<i className="fas fa-heart" />}
             icon={<MagnifyingGlassIcon />}
             className={"border-0"}

@@ -54,7 +54,7 @@ export const Tour = () => {
   console.log(import.meta.env.VITE_URL_BACK)
 
   return (
-    <div className={"mt-5 ml-10"}>
+    <div className={"mt-[170px] ml-3"}>
       <Typography>
         <Title title={"TOURS"} />
       </Typography>

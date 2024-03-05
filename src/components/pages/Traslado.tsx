@@ -41,7 +41,7 @@ export const Traslado = () => {
   ]
 
   return (
-    <div className={"mt-10 ml-10"}>
+    <div className={"mt-[170px] ml-3"}>
       <Typography>
           <Title title={"TRASLADOS"} />
 
