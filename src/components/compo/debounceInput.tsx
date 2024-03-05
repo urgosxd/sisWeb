@@ -39,6 +39,7 @@ function DebouncedInput({
                 className: "hidden",
             }}
             placeholder="Busqueda"
+
             // icon={<i className="fas fa-heart" />}
             icon={<MagnifyingGlassIcon />}
             className={"border-0"}
