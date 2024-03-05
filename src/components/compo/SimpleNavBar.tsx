@@ -30,17 +30,13 @@ export function NavbarSimple() {
     }, []);
 
     return (
-        <Navbar className="max-w-full px-4 py-8 lg:px-8 bg-[#D20000] h-[120px]" >
-            <div className="flex items-center justify-between text-white">
-                <Typography
-                    as="a"
-                    href="#"
-                    variant="h6"
-                    className="mr-4 cursor-pointer py-1.5"
-                >
-                    <img  className="h-16 w-full object-cover object-center" src={"/src/assets/pdslogo.svg"} />
-                </Typography>
-                <NavList />
+        <Navbar className="max-w-full fixed z-20 lg:px-8 bg-[#D20000]  h-[150px]" >
+            <div className="flex flex-row  items-center justify-between text-white">
+                <div className={" w-40 h-[150px]"}>
+                    <img className=" max-w-40 max-h-40" src={"/src/assets/logo-psd.svg"}/>
+                </div>
+                <Typography className={"font-roboto font-bold text-3xl self-center"} children={"SISTEMA DE REGISTRO PDS VIAJES"} />
+                    <NavList />
             </div>
         </Navbar>
     );
